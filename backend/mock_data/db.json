@@ -1,0 +1,855 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "username": "alexwanderer",
+      "email": "alex@traviax.com",
+      "full_name": "Alex Wanderer",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      "bio": "Cinematic storyteller exploring one city at a time",
+      "city": "New York, USA",
+      "visited_places": 128,
+      "checkins": 342,
+      "cities": 42,
+      "followers": 1200,
+      "following": 320,
+      "likes": 8500,
+      "rated_places": 67,
+      "coordinates": { "lat": 40.7128, "lng": -74.0060 },
+      "badges": ["Explorer", "Photographer", "Storyteller"],
+      "created_at": "2024-01-15T10:00:00Z",
+      "posts": [
+        {
+          "id": "1",
+          "location": "Kyoto, Japan",
+          "timestamp": "2h ago",
+          "title": "Just landed in Kyoto!",
+          "description": "The autumn colors are unreal. So excited to explore and capture the beauty of this city.",
+          "image": "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=600&fit=crop",
+          "likes": 231,
+          "comments": 12,
+          "isLiked": false
+        },
+        {
+          "id": "2",
+          "location": "Paris, France",
+          "timestamp": "1 day ago",
+          "title": "Found the most amazing little cafe in Montmartre.",
+          "description": "Sometimes the best discoveries are the ones you don't plan for. The espresso here is life-changing!",
+          "image": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&h=600&fit=crop",
+          "likes": 544,
+          "comments": 62,
+          "isLiked": true
+        },
+        {
+          "id": "3",
+          "location": "Reykjavik, Iceland",
+          "timestamp": "3 days ago",
+          "title": "Chasing lights.",
+          "description": "Speechless. The aurora borealis is something you have to see to believe. Truly a magical experience.",
+          "image": "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&h=600&fit=crop",
+          "likes": 912,
+          "comments": 88,
+          "isLiked": false
+        },
+        {
+          "id": "4",
+          "location": "Tokyo, Japan",
+          "timestamp": "5 days ago",
+          "title": "Neon dreams in Shibuya",
+          "description": "The energy of this city is unmatched. Every corner tells a different story, every light paints a new scene.",
+          "likes": 678,
+          "comments": 45,
+          "isLiked": true
+        }
+      ]
+    },
+    {
+      "id": "u2",
+      "username": "marco_explorer",
+      "email": "marco@traviax.com",
+      "full_name": "Marco Rossi",
+      "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      "bio": "Capturing cinematic moments from around the world 🎬",
+      "city": "Istanbul, Turkey",
+      "visited_places": 62,
+      "checkins": 134,
+      "cities": 31,
+      "followers": 2103,
+      "following": 567,
+      "likes": 5678,
+      "rated_places": 89,
+      "coordinates": { "lat": 41.0082, "lng": 28.9784 },
+      "badges": ["Photographer", "Adventure Seeker", "Local Expert"],
+      "created_at": "2024-02-20T14:30:00Z"
+    }
+  ],
+  "reels": [
+    {
+      "id": "r1",
+      "title": "Golden Hour at Sultanahmet",
+      "location": "Istanbul, Turkey",
+      "videoUrl": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+      "thumbnail": "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=400&h=600&fit=crop",
+      "likes": 1247,
+      "comments": 89,
+      "shares": 156,
+      "views": 12400,
+      "creator_id": "u2",
+      "created_at": "2024-11-01T18:00:00Z",
+      "tags": ["history", "architecture", "golden_hour"],
+      "duration": 45,
+      "description": "The magical golden hour at Sultanahmet Mosque - pure cinematic beauty ✨🕌"
+    },
+    {
+      "id": "r2",
+      "title": "Hidden Café in Dubai's Old Quarter",
+      "location": "Al Fahidi, Dubai",
+      "videoUrl": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+      "thumbnail": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=600&fit=crop",
+      "likes": 892,
+      "comments": 67,
+      "shares": 89,
+      "views": 8900,
+      "creator_id": "u1",
+      "created_at": "2024-11-02T12:30:00Z",
+      "tags": ["food", "hidden_gems", "culture"],
+      "duration": 38,
+      "description": "Found this incredible traditional café tucked away in the historic district ☕️🏛️"
+    },
+    {
+      "id": "r3",
+      "title": "Sunset Over Bosphorus",
+      "location": "Galata Bridge, Istanbul",
+      "videoUrl": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4",
+      "thumbnail": "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=400&h=600&fit=crop",
+      "likes": 2156,
+      "comments": 145,
+      "shares": 234,
+      "views": 18700,
+      "creator_id": "u2",
+      "created_at": "2024-11-03T19:45:00Z",
+      "tags": ["sunset", "bridge", "cinematic"],
+      "duration": 52,
+      "description": "The most cinematic sunset view in Istanbul - absolutely breathtaking 🌅🌉"
+    },
+    {
+      "id": "r4",
+      "title": "Street Food Adventure in Bangkok",
+      "location": "Chatuchak Market, Bangkok",
+      "videoUrl": "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+      "thumbnail": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=600&fit=crop",
+      "likes": 1834,
+      "comments": 203,
+      "shares": 167,
+      "views": 15600,
+      "creator_id": "u1",
+      "created_at": "2024-11-04T14:20:00Z",
+      "tags": ["food", "street_food", "culture", "thailand"],
+      "duration": 42,
+      "description": "Exploring the vibrant street food scene - every bite tells a story! 🍜🔥"
+    },
+    {
+      "id": "r5",
+      "title": "Northern Lights in Iceland",
+      "location": "Reykjavik, Iceland",
+      "videoUrl": "https://file-examples.com/storage/fe68c1f7d7e5bb45bb1b4bf/2017/10/file_example_MP4_1280_10MG.mp4",
+      "thumbnail": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop",
+      "likes": 3421,
+      "comments": 287,
+      "shares": 456,
+      "views": 28900,
+      "creator_id": "u2",
+      "created_at": "2024-11-05T02:15:00Z",
+      "tags": ["nature", "aurora", "iceland", "night_sky"],
+      "duration": 35,
+      "description": "Dancing with the Northern Lights - nature's most magical show 💚✨"
+    },
+    {
+      "id": "r6",
+      "title": "Santorini Blue Domes",
+      "location": "Oia, Santorini",
+      "videoUrl": "https://drive.google.com/file/d/1OJEPQC9SSlkLt7mwZYLLt0McJI6_eqEu/view?usp=sharing",
+      "thumbnail": "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&h=600&fit=crop",
+      "likes": 2678,
+      "comments": 198,
+      "shares": 312,
+      "views": 22100,
+      "creator_id": "u1",
+      "created_at": "2024-11-06T16:30:00Z",
+      "tags": ["greece", "architecture", "blue_domes", "mediterranean"],
+      "duration": 48,
+      "description": "The iconic blue domes of Santorini never get old 💙🏛️"
+    },
+    {
+      "id": "r7",
+      "title": "Tokyo Neon Nights",
+      "location": "Shibuya, Tokyo",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+      "thumbnail": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=600&fit=crop",
+      "likes": 1956,
+      "comments": 156,
+      "shares": 189,
+      "views": 17800,
+      "creator_id": "u2",
+      "created_at": "2024-11-07T21:45:00Z",
+      "tags": ["japan", "neon", "city", "night_photography"],
+      "duration": 40,
+      "description": "Lost in Tokyo's neon wonderland - cyberpunk vibes! 🌃⚡"
+    },
+    {
+      "id": "r8",
+      "title": "Moroccan Spice Market",
+      "location": "Marrakech, Morocco",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+      "thumbnail": "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=400&h=600&fit=crop",
+      "likes": 1423,
+      "comments": 134,
+      "shares": 98,
+      "views": 13200,
+      "creator_id": "u1",
+      "created_at": "2024-11-08T11:20:00Z",
+      "tags": ["morocco", "spices", "market", "culture"],
+      "duration": 36,
+      "description": "Colors, aromas, and stories in every corner of the spice market 🌶️🎨"
+    },
+    {
+      "id": "r9",
+      "title": "Swiss Alps Paragliding",
+      "location": "Interlaken, Switzerland",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+      "thumbnail": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop",
+      "likes": 2987,
+      "comments": 245,
+      "shares": 378,
+      "views": 25600,
+      "creator_id": "u2",
+      "created_at": "2024-11-09T13:10:00Z",
+      "tags": ["adventure", "paragliding", "alps", "adrenaline"],
+      "duration": 55,
+      "description": "Flying over the Swiss Alps - pure adrenaline and breathtaking views! 🪂⛰️"
+    },
+    {
+      "id": "r10",
+      "title": "Bali Rice Terraces at Dawn",
+      "location": "Jatiluwih, Bali",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+      "thumbnail": "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400&h=600&fit=crop",
+      "likes": 2134,
+      "comments": 167,
+      "shares": 223,
+      "views": 19400,
+      "creator_id": "u1",
+      "created_at": "2024-11-10T06:30:00Z",
+      "tags": ["bali", "rice_terraces", "sunrise", "nature"],
+      "duration": 43,
+      "description": "Sunrise over Bali's ancient rice terraces - pure serenity 🌅🌾"
+    }
+  ],
+  "places": [
+    {
+      "id": "p1",
+      "name": "Sultanahmet Mosque",
+      "type": "mosque",
+      "city": "Istanbul",
+      "country": "Turkey",
+      "rating": 4.8,
+      "cover_photo": "/assets/places/sultanahmet.jpg",
+      "media": [
+        "/assets/places/sultanahmet-1.jpg",
+        "/assets/places/sultanahmet-2.jpg"
+      ],
+      "coordinates": { "lat": 41.0054, "lng": 28.9768 },
+      "summary": "Historic mosque with stunning blue tiles and magnificent architecture",
+      "checkins_count": 234,
+      "saved_count": 567,
+      "category": "Historical Site"
+    },
+    {
+      "id": "p2",
+      "name": "Café Noir",
+      "type": "cafe",
+      "city": "Dubai",
+      "country": "UAE",
+      "rating": 4.6,
+      "cover_photo": "/assets/places/cafenoir.jpg",
+      "media": [
+        "/assets/places/cafenoir-1.jpg",
+        "/assets/places/cafenoir-2.jpg"
+      ],
+      "coordinates": { "lat": 25.2048, "lng": 55.2708 },
+      "summary": "Classic cinematic café with traditional Arabic coffee and modern ambiance",
+      "checkins_count": 89,
+      "saved_count": 234,
+      "category": "Food & Drink"
+    },
+    {
+      "id": "p3",
+      "name": "Galata Tower",
+      "type": "landmark",
+      "city": "Istanbul",
+      "country": "Turkey",
+      "rating": 4.7,
+      "cover_photo": "/assets/places/galata.jpg",
+      "media": ["/assets/places/galata-1.jpg", "/assets/places/galata-2.jpg"],
+      "coordinates": { "lat": 41.0256, "lng": 28.9744 },
+      "summary": "Medieval stone tower offering panoramic views of Istanbul",
+      "checkins_count": 456,
+      "saved_count": 789,
+      "category": "Landmark"
+    }
+  ],
+  "checkins": [
+    {
+      "id": "c1",
+      "user_id": "u1",
+      "place_id": "p2",
+      "rating": 5,
+      "note": "Amazing traditional coffee and the ambiance is perfect for content creation!",
+      "photos": ["/assets/checkins/c1-photo1.jpg"],
+      "created_at": "2024-11-02T13:00:00Z",
+      "likes": 45,
+      "comments": 12
+    },
+    {
+      "id": "c2",
+      "user_id": "u2",
+      "place_id": "p1",
+      "rating": 5,
+      "note": "Captured the most cinematic shots during golden hour. Absolutely magical!",
+      "photos": [
+        "/assets/checkins/c2-photo1.jpg",
+        "/assets/checkins/c2-photo2.jpg"
+      ],
+      "created_at": "2024-11-01T18:30:00Z",
+      "likes": 89,
+      "comments": 23
+    }
+  ],
+  "posts": [
+    {
+      "id": "post1",
+      "user_id": "u1",
+      "content": "Just discovered the most incredible hidden café in Old Dubai! The traditional architecture mixed with modern touches creates the perfect cinematic atmosphere ✨",
+      "media": ["/assets/posts/post1-1.jpg"],
+      "likes": 67,
+      "comments": 15,
+      "created_at": "2024-11-02T14:00:00Z"
+    },
+    {
+      "id": "post2",
+      "user_id": "u2",
+      "content": "Istanbul continues to amaze me every single day. The way light hits these ancient buildings is pure poetry 🎬",
+      "media": ["/assets/posts/post2-1.jpg"],
+      "likes": 134,
+      "comments": 28,
+      "created_at": "2024-11-01T20:00:00Z"
+    }
+  ],
+  "comments": [
+    {
+      "id": "comment1",
+      "reel_id": "r1",
+      "user_id": "u1",
+      "content": "This is absolutely stunning! The golden hour timing is perfect 🌅",
+      "created_at": "2024-11-01T18:15:00Z",
+      "likes": 12
+    },
+    {
+      "id": "comment2",
+      "reel_id": "r2",
+      "user_id": "u2",
+      "content": "I need to visit this place! Adding to my Dubai list ✨",
+      "created_at": "2024-11-02T13:00:00Z",
+      "likes": 8
+    }
+  ],
+  "events": [
+    {
+      "id": "e1",
+      "title": "Istanbul Photography Walk",
+      "description": "Join us for a cinematic photography walk through Istanbul's historic districts",
+      "location": "Sultanahmet Square, Istanbul",
+      "date": "2024-11-15T10:00:00Z",
+      "price": 45,
+      "currency": "USD",
+      "attendees": 23,
+      "max_attendees": 30,
+      "cover_photo": "/assets/events/photo-walk.jpg",
+      "organizer_id": "u2",
+      "category": "Photography"
+    },
+    {
+      "id": "e2",
+      "title": "Dubai Food & Culture Tour",
+      "description": "Explore hidden gems and traditional flavors in Dubai's cultural districts",
+      "location": "Al Fahidi Historical District, Dubai",
+      "date": "2024-11-20T16:00:00Z",
+      "price": 75,
+      "currency": "USD",
+      "attendees": 18,
+      "max_attendees": 25,
+      "cover_photo": "/assets/events/food-tour.jpg",
+      "organizer_id": "u1",
+      "category": "Food & Culture"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "b1",
+      "user_id": "u1",
+      "type": "flight",
+      "reference": "TRV-FL-001234",
+      "status": "confirmed",
+      "details": {
+        "from": "DXB",
+        "to": "IST",
+        "departure": "2024-11-25T14:30:00Z",
+        "arrival": "2024-11-25T18:45:00Z",
+        "airline": "Turkish Airlines",
+        "price": 450,
+        "currency": "USD"
+      },
+      "created_at": "2024-11-05T10:00:00Z"
+    },
+    {
+      "id": "b2",
+      "user_id": "u2",
+      "type": "hotel",
+      "reference": "TRV-HT-005678",
+      "status": "confirmed",
+      "details": {
+        "name": "Sultanahmet Palace Hotel",
+        "location": "Istanbul, Turkey",
+        "checkin": "2024-11-25T15:00:00Z",
+        "checkout": "2024-11-28T11:00:00Z",
+        "nights": 3,
+        "price": 180,
+        "currency": "USD"
+      },
+      "created_at": "2024-11-05T11:30:00Z"
+    }
+  ],
+  "trips": [
+    {
+      "id": "t1",
+      "user_id": "u1",
+      "title": "Istanbul Cultural Discovery",
+      "destination": "Istanbul, Turkey",
+      "start_date": "2024-11-25T00:00:00Z",
+      "end_date": "2024-11-28T00:00:00Z",
+      "days": [
+        {
+          "day": 1,
+          "title": "Historic Peninsula",
+          "activities": [
+            {
+              "time": "09:00",
+              "activity": "Sultanahmet Mosque",
+              "duration": "1.5h"
+            },
+            { "time": "11:00", "activity": "Hagia Sophia", "duration": "2h" },
+            { "time": "14:00", "activity": "Topkapi Palace", "duration": "3h" },
+            {
+              "time": "18:00",
+              "activity": "Sunset at Galata Bridge",
+              "duration": "1h"
+            }
+          ]
+        },
+        {
+          "day": 2,
+          "title": "Bosphorus & Modern Istanbul",
+          "activities": [
+            {
+              "time": "10:00",
+              "activity": "Bosphorus Cruise",
+              "duration": "2h"
+            },
+            { "time": "13:00", "activity": "Galata Tower", "duration": "1h" },
+            {
+              "time": "15:00",
+              "activity": "Istiklal Street",
+              "duration": "2h"
+            },
+            {
+              "time": "19:00",
+              "activity": "Rooftop dinner in Beyoğlu",
+              "duration": "2h"
+            }
+          ]
+        },
+        {
+          "day": 3,
+          "title": "Local Experiences",
+          "activities": [
+            { "time": "09:00", "activity": "Grand Bazaar", "duration": "2h" },
+            {
+              "time": "12:00",
+              "activity": "Turkish Bath Experience",
+              "duration": "2h"
+            },
+            {
+              "time": "16:00",
+              "activity": "Photography Walk",
+              "duration": "3h"
+            },
+            {
+              "time": "20:00",
+              "activity": "Traditional Turkish Dinner",
+              "duration": "2h"
+            }
+          ]
+        }
+      ],
+      "created_at": "2024-11-05T12:00:00Z"
+    }
+  ],
+  "trending_places": [
+    {
+      "id": "tp1",
+      "name": "Kyoto",
+      "country": "Japan",
+      "image": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=350&fit=crop",
+      "description": "Ancient temples and cherry blossoms",
+      "rating": 4.9,
+      "visitors": "2.1M"
+    },
+    {
+      "id": "tp2",
+      "name": "Santorini",
+      "country": "Greece",
+      "image": "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&h=350&fit=crop",
+      "description": "Iconic blue domes and sunset views",
+      "rating": 4.8,
+      "visitors": "1.8M"
+    }
+  ],
+  "itineraries": [
+    {
+      "id": "it1",
+      "title": "4 Days in Kyoto",
+      "location": "Kyoto, Japan",
+      "duration": "4 Days",
+      "dateRange": "October 26 - October 29",
+      "startDate": "2024-10-26",
+      "endDate": "2024-10-29",
+      "heroImage": "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=600&fit=crop",
+      "rating": 4.9,
+      "price": 1200,
+      "currency": "USD",
+      "days": [
+        {
+          "day": 1,
+          "title": "Historic Temples & Gion",
+          "date": "Oct 26",
+          "locationCount": 4,
+          "activities": [
+            {
+              "time": "MORNING",
+              "name": "Kiyomizu-dera Temple",
+              "description": "Iconic wooden temple with city views",
+              "image": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "LATE MORNING",
+              "name": "Sannenzaka & Ninenzaka",
+              "description": "Historic preserved streets",
+              "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "AFTERNOON",
+              "name": "Gion District",
+              "description": "Explore the famous geisha district",
+              "image": "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "EVENING",
+              "name": "Yasaka Shrine",
+              "description": "Beautiful shrine illuminated at night",
+              "image": "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=200&h=150&fit=crop"
+            }
+          ]
+        },
+        {
+          "day": 2,
+          "title": "Arashiyama Bamboo Grove",
+          "date": "Oct 27",
+          "locationCount": 3,
+          "activities": [
+            {
+              "time": "MORNING",
+              "name": "Bamboo Grove",
+              "description": "Walk through towering bamboo forest",
+              "image": "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "AFTERNOON",
+              "name": "Tenryu-ji Temple",
+              "description": "UNESCO World Heritage zen temple",
+              "image": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "EVENING",
+              "name": "Togetsukyo Bridge",
+              "description": "Scenic bridge with mountain views",
+              "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=200&h=150&fit=crop"
+            }
+          ]
+        },
+        {
+          "day": 3,
+          "title": "Fushimi Inari Shrine",
+          "date": "Oct 28",
+          "locationCount": 2,
+          "activities": [
+            {
+              "time": "MORNING",
+              "name": "Fushimi Inari Shrine",
+              "description": "Thousands of vermillion torii gates",
+              "image": "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "AFTERNOON",
+              "name": "Sake Tasting in Fushimi",
+              "description": "Traditional sake brewery district",
+              "image": "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=200&h=150&fit=crop"
+            }
+          ]
+        },
+        {
+          "day": 4,
+          "title": "Golden Pavilion & Departure",
+          "date": "Oct 29",
+          "locationCount": 2,
+          "activities": [
+            {
+              "time": "MORNING",
+              "name": "Kinkaku-ji (Golden Pavilion)",
+              "description": "Famous golden temple reflection",
+              "image": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "LATE MORNING",
+              "name": "Ryoan-ji Temple",
+              "description": "Famous zen rock garden",
+              "image": "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=200&h=150&fit=crop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "it2",
+      "title": "5 Days in Paris",
+      "location": "Paris, France",
+      "duration": "5 Days",
+      "dateRange": "November 15 - November 19",
+      "startDate": "2024-11-15",
+      "endDate": "2024-11-19",
+      "heroImage": "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=800&h=600&fit=crop",
+      "rating": 4.8,
+      "price": 1450,
+      "currency": "USD",
+      "days": [
+        {
+          "day": 1,
+          "title": "Classic Paris Icons",
+          "date": "Nov 15",
+          "locationCount": 3,
+          "activities": [
+            {
+              "time": "MORNING",
+              "name": "Eiffel Tower",
+              "description": "Iconic iron tower and city symbol",
+              "image": "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "AFTERNOON",
+              "name": "Seine River Cruise",
+              "description": "Scenic boat tour along the Seine",
+              "image": "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "EVENING",
+              "name": "Champs-Élysées",
+              "description": "Famous avenue and Arc de Triomphe",
+              "image": "https://images.unsplash.com/photo-1431274172761-fca41d930114?w=200&h=150&fit=crop"
+            }
+          ]
+        },
+        {
+          "day": 2,
+          "title": "Art & Culture",
+          "date": "Nov 16",
+          "locationCount": 2,
+          "activities": [
+            {
+              "time": "MORNING",
+              "name": "Louvre Museum",
+              "description": "World's largest art museum",
+              "image": "https://images.unsplash.com/photo-1566139884669-4b9356b4c040?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "AFTERNOON",
+              "name": "Notre-Dame Area",
+              "description": "Gothic cathedral and Île de la Cité",
+              "image": "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=200&h=150&fit=crop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "it3",
+      "title": "6 Days in Tokyo",
+      "location": "Tokyo, Japan",
+      "duration": "6 Days",
+      "dateRange": "December 1 - December 6",
+      "startDate": "2024-12-01",
+      "endDate": "2024-12-06",
+      "heroImage": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&h=600&fit=crop",
+      "rating": 5.0,
+      "price": 1800,
+      "currency": "USD",
+      "days": [
+        {
+          "day": 1,
+          "title": "Modern Tokyo",
+          "date": "Dec 1",
+          "locationCount": 4,
+          "activities": [
+            {
+              "time": "MORNING",
+              "name": "Shibuya Crossing",
+              "description": "World's busiest pedestrian crossing",
+              "image": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=200&h=150&fit=crop"
+            },
+            {
+              "time": "AFTERNOON",
+              "name": "Harajuku",
+              "description": "Youth culture and fashion district",
+              "image": "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=200&h=150&fit=crop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "it4",
+      "title": "7 Days in Rome",
+      "location": "Rome, Italy",
+      "duration": "7 Days",
+      "dateRange": "January 10 - January 16",
+      "startDate": "2025-01-10",
+      "endDate": "2025-01-16",
+      "heroImage": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&h=600&fit=crop",
+      "rating": 4.7,
+      "price": 1350,
+      "currency": "USD",
+      "days": [
+        {
+          "day": 1,
+          "title": "Ancient Rome",
+          "date": "Jan 10",
+          "locationCount": 3,
+          "activities": [
+            {
+              "time": "MORNING",
+              "name": "Colosseum",
+              "description": "Ancient Roman amphitheater",
+              "image": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=200&h=150&fit=crop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "it5",
+      "title": "3 Days in Santorini",
+      "location": "Santorini, Greece",
+      "duration": "3 Days",
+      "dateRange": "March 20 - March 22",
+      "startDate": "2025-03-20",
+      "endDate": "2025-03-22",
+      "heroImage": "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&h=600&fit=crop",
+      "rating": 4.9,
+      "price": 950,
+      "currency": "USD",
+      "days": [
+        {
+          "day": 1,
+          "title": "Oia Sunset",
+          "date": "Mar 20",
+          "locationCount": 2,
+          "activities": [
+            {
+              "time": "AFTERNOON",
+              "name": "Oia Village",
+              "description": "Famous blue domes and sunset views",
+              "image": "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=200&h=150&fit=crop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "it6",
+      "title": "5 Days in Bali",
+      "location": "Bali, Indonesia",
+      "duration": "5 Days",
+      "dateRange": "April 5 - April 9",
+      "startDate": "2025-04-05",
+      "endDate": "2025-04-09",
+      "heroImage": "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=800&h=600&fit=crop",
+      "rating": 4.8,
+      "price": 1100,
+      "currency": "USD",
+      "days": [
+        {
+          "day": 1,
+          "title": "Ubud Rice Terraces",
+          "date": "Apr 5",
+          "locationCount": 3,
+          "activities": [
+            {
+              "time": "MORNING",
+              "name": "Tegallalang Rice Terraces",
+              "description": "Stunning terraced rice fields",
+              "image": "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=200&h=150&fit=crop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "it7",
+      "title": "4 Days in Dubai",
+      "location": "Dubai, UAE",
+      "duration": "4 Days",
+      "dateRange": "May 12 - May 15",
+      "startDate": "2025-05-12",
+      "endDate": "2025-05-15",
+      "heroImage": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&h=600&fit=crop",
+      "rating": 4.6,
+      "price": 1600,
+      "currency": "USD",
+      "days": [
+        {
+          "day": 1,
+          "title": "Modern Dubai",
+          "date": "May 12",
+          "locationCount": 4,
+          "activities": [
+            {
+              "time": "MORNING",
+              "name": "Burj Khalifa",
+              "description": "World's tallest building",
+              "image": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=200&h=150&fit=crop"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
