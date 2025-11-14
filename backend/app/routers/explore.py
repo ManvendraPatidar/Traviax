@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from typing import List, Dict, Any
 import json
 import os
@@ -33,6 +33,73 @@ async def get_hotels() -> Dict[str, Any]:
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/search")
+async def search_explore_items(q: str = Query("", description="Search keyword")) -> Dict[str, Any]:
+    """Search across hotels, places, and activities."""
+    try:
+        query = q.strip()
+        if not query:
+            return {"success": True, "data": [], "error": None}
+
+        mock_data = load_mock_data()
+        query_lower = query.lower()
+
+        def item_matches(item: Dict[str, Any]) -> bool:
+            searchable_fields = ["name", "title", "location", "category"]
+            for field in searchable_fields:
+                value = item.get(field)
+                if value and query_lower in str(value).lower():
+                    return True
+            return False
+
+        def build_result(item: Dict[str, Any], item_type: str) -> Dict[str, Any]:
+            image = item.get("image")
+            if not image:
+                photos = item.get("photos", [])
+                image = photos[0] if photos else ""
+
+            rating = item.get("rating")
+            try:
+                rating_value = float(rating) if rating is not None else 0.0
+            except (TypeError, ValueError):
+                rating_value = 0.0
+
+            return {
+                "id": item.get("id", ""),
+                "type": item_type,
+                "title": item.get("name") or item.get("title") or "",
+                "image": image or "",
+                "rating": rating_value,
+            }
+
+        results: List[Dict[str, Any]] = []
+
+        for hotel in mock_data.get("hotels", []):
+            if item_matches(hotel):
+                results.append(build_result(hotel, "hotel"))
+
+        for place in mock_data.get("places", []):
+            if item_matches(place):
+                results.append(build_result(place, "place"))
+
+        for activity in mock_data.get("activities", []):
+            if item_matches(activity):
+                results.append(build_result(activity, "activity"))
+
+        return {
+            "success": True,
+            "data": results,
+            "error": None,
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        return {
+            "success": False,
+            "data": [],
+            "error": str(exc),
+        }
 
 @router.get("/places")
 async def get_places() -> Dict[str, Any]:

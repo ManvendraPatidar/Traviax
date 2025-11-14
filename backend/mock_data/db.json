@@ -246,65 +246,7 @@
       "description": "Sunrise over Bali's ancient rice terraces - pure serenity 🌅🌾"
     }
   ],
-  "places": [
-    {
-      "id": "p1",
-      "name": "Sultanahmet Mosque",
-      "type": "mosque",
-      "city": "Istanbul",
-      "country": "Turkey",
-      "rating": 4.8,
-      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQx3Go3XTZiLOw-BNejycNe7BNEPXf5ZVBmAA&s",
-      "description": "Explore hidden gems and traditional flavors in Cafe",
-      "cover_photo": "/assets/places/sultanahmet.jpg",
-      "media": [
-        "/assets/places/sultanahmet-1.jpg",
-        "/assets/places/sultanahmet-2.jpg"
-      ],
-      "coordinates": { "lat": 41.0054, "lng": 28.9768 },
-      "summary": "Historic mosque with stunning blue tiles and magnificent architecture",
-      "checkins_count": 234,
-      "saved_count": 567,
-      "category": "Historical Site"
-    },
-    {
-      "id": "p2",
-      "name": "Café Noir",
-      "type": "cafe",
-      "city": "Dubai",
-      "country": "UAE",
-      "rating": 4.6,
-      "cover_photo": "/assets/places/cafenoir.jpg",
-      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJWyONO5Ei9mJ8Xw9rokxQI_Muz_9G22IW0A&s",
-      "description": "Explore hidden gems and traditional flavors in Cafe",
-      "media": [
-        "/assets/places/cafenoir-1.jpg",
-        "/assets/places/cafenoir-2.jpg"
-      ],
-      "coordinates": { "lat": 25.2048, "lng": 55.2708 },
-      "summary": "Classic cinematic café with traditional Arabic coffee and modern ambiance",
-      "checkins_count": 89,
-      "saved_count": 234,
-      "category": "Food & Drink"
-    },
-    {
-      "id": "p3",
-      "name": "Galata Tower",
-      "type": "landmark",
-      "city": "Istanbul",
-      "country": "Turkey",
-      "rating": 4.7,
-      "image": "https://www.travelure.in/wp-content/uploads/2021/04/Galata-Tower-6.jpg",
-      "description": "Ancient Roman Tower ",
-      "cover_photo": "/assets/places/galata.jpg",
-      "media": ["/assets/places/galata-1.jpg", "/assets/places/galata-2.jpg"],
-      "coordinates": { "lat": 41.0256, "lng": 28.9744 },
-      "summary": "Medieval stone tower offering panoramic views of Istanbul",
-      "checkins_count": 456,
-      "saved_count": 789,
-      "category": "Landmark"
-    }
-  ],
+
   "checkins": [
     {
       "id": "c1",

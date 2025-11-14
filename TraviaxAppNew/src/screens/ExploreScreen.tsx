@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   Dimensions,
   ActivityIndicator,
+  Keyboard,
 } from 'react-native';
 import {apiService} from '../services/api';
 
@@ -141,6 +142,8 @@ interface ExploreScreenProps {
   };
 }
 
+const DropdownSeparator = () => <View style={styles.dropdownSeparator} />;
+
 const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -148,6 +151,11 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
   const [hotels, setHotels] = useState<any[]>([]);
   const [places, setPlaces] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
+
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Loading states
   const [hotelsLoading, setHotelsLoading] = useState(true);
@@ -162,6 +170,98 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
   useEffect(() => {
     fetchAllData();
   }, []);
+
+  const performSearch = useCallback(async (query: string) => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      setSearchResults([]);
+      setSearchError(null);
+      setSearchLoading(false);
+      return;
+    }
+
+    try {
+      setSearchLoading(true);
+      setSearchError(null);
+      const results = await apiService.searchExplore(trimmedQuery);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Error searching explore items:', error);
+      setSearchError('Failed to fetch search results');
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = null;
+    }
+
+    const trimmedQuery = searchQuery.trim();
+
+    if (!trimmedQuery) {
+      setSearchResults([]);
+      setSearchError(null);
+      setSearchLoading(false);
+      return () => {};
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      performSearch(trimmedQuery);
+    }, 400);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
+      }
+    };
+  }, [searchQuery, performSearch]);
+
+  const handleSearchResultPress = useCallback(
+    (item: any) => {
+      setSearchQuery('');
+      setSearchResults([]);
+      Keyboard.dismiss();
+
+      const mappedItem = {
+        ...item,
+        name: item.title,
+        description:
+          item.description ||
+          `${item.title} - Experience the beauty and culture of this amazing destination.`,
+        image: item.image,
+      };
+
+      navigation?.navigate('PlaceDetails', {
+        place: createPlaceData(mappedItem),
+      });
+    },
+    [navigation],
+  );
+
+  const renderSearchResult = useCallback(
+    ({item}: {item: any}) => (
+      <TouchableOpacity
+        style={styles.searchResultItem}
+        onPress={() => handleSearchResultPress(item)}>
+        <Image source={{uri: item.image}} style={styles.searchResultImage} />
+        <View style={styles.searchResultContent}>
+          <Text style={styles.searchResultTitle} numberOfLines={1}>
+            {item.title}
+          </Text>
+          <Text style={styles.searchResultSubtitle}>
+            {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+          </Text>
+          <Text style={styles.searchResultRating}>⭐ {item.rating}</Text>
+        </View>
+      </TouchableOpacity>
+    ),
+    [handleSearchResultPress],
+  );
 
   const fetchAllData = async () => {
     await Promise.all([fetchHotels(), fetchPlaces(), fetchActivities()]);
@@ -412,7 +512,14 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
               placeholder="Search destinations, hotels, activities..."
               placeholderTextColor="#888888"
               value={searchQuery}
-              onChangeText={setSearchQuery}
+              onChangeText={text => {
+                setSearchQuery(text);
+              }}
+              onSubmitEditing={() => {
+                performSearch(searchQuery);
+                Keyboard.dismiss();
+              }}
+              returnKeyType="search"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity
@@ -422,6 +529,42 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
               </TouchableOpacity>
             )}
           </View>
+
+          {searchQuery.trim().length > 0 && (
+            <View style={styles.searchDropdown}>
+              {searchLoading ? (
+                <View style={styles.dropdownStateContainer}>
+                  <ActivityIndicator size="small" color="#FFD700" />
+                  <Text style={styles.dropdownStateText}>Searching...</Text>
+                </View>
+              ) : searchError ? (
+                <View style={styles.dropdownStateContainer}>
+                  <Text
+                    style={[
+                      styles.dropdownStateText,
+                      styles.dropdownErrorText,
+                    ]}>
+                    {searchError}
+                  </Text>
+                </View>
+              ) : searchResults.length === 0 ? (
+                <View style={styles.dropdownStateContainer}>
+                  <Text style={styles.dropdownStateText}>No results found</Text>
+                </View>
+              ) : (
+                <View style={styles.dropdownList}>
+                  {searchResults.map((item, index) => (
+                    <React.Fragment key={`${item.type}-${item.id}`}>
+                      {renderSearchResult({item})}
+                      {index < searchResults.length - 1 ? (
+                        <DropdownSeparator />
+                      ) : null}
+                    </React.Fragment>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
         </View>
 
         {/* Quick Filters */}
@@ -540,6 +683,67 @@ const styles = StyleSheet.create({
   clearButtonText: {
     color: '#888888',
     fontSize: 16,
+  },
+  searchDropdown: {
+    marginTop: 10,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#333333',
+    overflow: 'hidden',
+  },
+  dropdownList: {
+    maxHeight: 260,
+  },
+  dropdownSeparator: {
+    height: 1,
+    backgroundColor: '#2A2A2A',
+  },
+  searchResultItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  searchResultImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    marginRight: 12,
+    backgroundColor: '#222222',
+  },
+  searchResultContent: {
+    flex: 1,
+  },
+  searchResultTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  searchResultSubtitle: {
+    color: '#AAAAAA',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  searchResultRating: {
+    color: '#FFD700',
+    fontSize: 12,
+    marginTop: 6,
+    fontWeight: '600',
+  },
+  dropdownStateContainer: {
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  dropdownStateText: {
+    color: '#CCCCCC',
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  dropdownErrorText: {
+    color: '#FF6B6B',
   },
   filtersContainer: {
     paddingHorizontal: 20,

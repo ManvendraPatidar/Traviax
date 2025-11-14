@@ -14,9 +14,12 @@
         "prime": "3:00 PM - 11:00 AM"
       },
       "facts": [
-        {"icon": "🏢", "text": "50 floors with panoramic city and ocean views"},
-        {"icon": "🍽️", "text": "5 award-winning restaurants and bars"},
-        {"icon": "🏊", "text": "Infinity pool on the 45th floor"}
+        {
+          "icon": "🏢",
+          "text": "50 floors with panoramic city and ocean views"
+        },
+        { "icon": "🍽️", "text": "5 award-winning restaurants and bars" },
+        { "icon": "🏊", "text": "Infinity pool on the 45th floor" }
       ],
       "photos": [
         "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
@@ -38,8 +41,8 @@
         "prime": "2:00 PM - 12:00 PM"
       },
       "facts": [
-        {"icon": "🏖️", "text": "Direct access to pristine white sand beach"},
-        {"icon": "🌺", "text": "Traditional Balinese spa and wellness center"}
+        { "icon": "🏖️", "text": "Direct access to pristine white sand beach" },
+        { "icon": "🌺", "text": "Traditional Balinese spa and wellness center" }
       ],
       "photos": [
         "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop",
@@ -60,8 +63,8 @@
         "prime": "3:00 PM - 11:00 AM"
       },
       "facts": [
-        {"icon": "⛰️", "text": "Direct views of the Matterhorn peak"},
-        {"icon": "🎿", "text": "Ski-in, ski-out access to slopes"}
+        { "icon": "⛰️", "text": "Direct views of the Matterhorn peak" },
+        { "icon": "🎿", "text": "Ski-in, ski-out access to slopes" }
       ],
       "photos": [
         "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop",
@@ -82,8 +85,8 @@
         "prime": "3:00 PM - 12:00 PM"
       },
       "facts": [
-        {"icon": "🌃", "text": "Prime location in Shibuya crossing area"},
-        {"icon": "🍣", "text": "Rooftop sushi bar with city views"}
+        { "icon": "🌃", "text": "Prime location in Shibuya crossing area" },
+        { "icon": "🍣", "text": "Rooftop sushi bar with city views" }
       ],
       "photos": [
         "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&h=300&fit=crop",
@@ -104,8 +107,8 @@
         "prime": "4:00 PM - 11:00 AM"
       },
       "facts": [
-        {"icon": "🌅", "text": "Best sunset views in Santorini"},
-        {"icon": "🏛️", "text": "Traditional Cycladic architecture"}
+        { "icon": "🌅", "text": "Best sunset views in Santorini" },
+        { "icon": "🏛️", "text": "Traditional Cycladic architecture" }
       ],
       "photos": [
         "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&h=300&fit=crop",
@@ -126,8 +129,8 @@
         "prime": "3:00 PM - 12:00 PM"
       },
       "facts": [
-        {"icon": "🗼", "text": "Walking distance to Eiffel Tower"},
-        {"icon": "🥐", "text": "French patisserie breakfast included"}
+        { "icon": "🗼", "text": "Walking distance to Eiffel Tower" },
+        { "icon": "🥐", "text": "French patisserie breakfast included" }
       ],
       "photos": [
         "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=300&fit=crop",
@@ -148,8 +151,11 @@
         "prime": "3:00 PM - 11:00 AM"
       },
       "facts": [
-        {"icon": "🌸", "text": "Traditional Japanese garden with cherry blossoms"},
-        {"icon": "♨️", "text": "Private onsen hot spring baths"}
+        {
+          "icon": "🌸",
+          "text": "Traditional Japanese garden with cherry blossoms"
+        },
+        { "icon": "♨️", "text": "Private onsen hot spring baths" }
       ],
       "photos": [
         "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=300&fit=crop",
@@ -170,8 +176,8 @@
         "prime": "4:00 PM - 11:00 AM"
       },
       "facts": [
-        {"icon": "💚", "text": "Glass ceiling for aurora viewing"},
-        {"icon": "🔥", "text": "Cozy fireplace in every room"}
+        { "icon": "💚", "text": "Glass ceiling for aurora viewing" },
+        { "icon": "🔥", "text": "Cozy fireplace in every room" }
       ],
       "photos": [
         "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
@@ -192,8 +198,8 @@
         "prime": "2:00 PM - 12:00 PM"
       },
       "facts": [
-        {"icon": "🐠", "text": "Glass floor panels for reef viewing"},
-        {"icon": "🛥️", "text": "Private speedboat transfers included"}
+        { "icon": "🐠", "text": "Glass floor panels for reef viewing" },
+        { "icon": "🛥️", "text": "Private speedboat transfers included" }
       ],
       "photos": [
         "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
@@ -214,8 +220,8 @@
         "prime": "3:00 PM - 12:00 PM"
       },
       "facts": [
-        {"icon": "🏙️", "text": "360-degree city views from rooftop"},
-        {"icon": "🍸", "text": "Award-winning rooftop cocktail bar"}
+        { "icon": "🏙️", "text": "360-degree city views from rooftop" },
+        { "icon": "🍸", "text": "Award-winning rooftop cocktail bar" }
       ],
       "photos": [
         "https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?w=400&h=300&fit=crop",
@@ -226,223 +232,60 @@
   "places": [
     {
       "id": "p1",
-      "name": "Burj Khalifa",
-      "location": "Downtown Dubai, UAE",
+      "name": "Sultanahmet Mosque",
+      "type": "mosque",
+      "city": "Istanbul",
+      "country": "Turkey",
       "rating": 4.8,
-      "reviews": 3421,
-      "price": "$45/person",
-      "image": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&h=600&fit=crop",
-      "description": "The world's tallest building offering breathtaking panoramic views of Dubai.",
-      "visitingHours": {
-        "daily": "10:00 AM - 11:00 PM",
-        "prime": "4:00 PM - 6:30 PM"
-      },
-      "facts": [
-        {"icon": "📏", "text": "Stands at 828 meters (2,717 feet) tall"},
-        {"icon": "⚡", "text": "World's fastest elevators at 10 m/s"}
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQx3Go3XTZiLOw-BNejycNe7BNEPXf5ZVBmAA&s",
+      "description": "Explore hidden gems and traditional flavors in Cafe",
+      "cover_photo": "/assets/places/sultanahmet.jpg",
+      "media": [
+        "/assets/places/sultanahmet-1.jpg",
+        "/assets/places/sultanahmet-2.jpg"
       ],
-      "photos": [
-        "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400&h=300&fit=crop"
-      ]
+      "coordinates": { "lat": 41.0054, "lng": 28.9768 },
+      "summary": "Historic mosque with stunning blue tiles and magnificent architecture",
+      "checkins_count": 234,
+      "saved_count": 567,
+      "category": "Historical Site"
     },
     {
       "id": "p2",
-      "name": "Eiffel Tower",
-      "location": "Paris, France",
+      "name": "Café Noir",
+      "type": "cafe",
+      "city": "Dubai",
+      "country": "UAE",
       "rating": 4.6,
-      "reviews": 5234,
-      "price": "$29/person",
-      "image": "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=800&h=600&fit=crop",
-      "description": "Iconic iron tower and symbol of Paris offering stunning city views.",
-      "visitingHours": {
-        "daily": "9:30 AM - 11:45 PM",
-        "prime": "7:00 PM - 11:00 PM"
-      },
-      "facts": [
-        {"icon": "🗼", "text": "324 meters tall iron lattice tower"},
-        {"icon": "💡", "text": "20,000 light bulbs illuminate it nightly"}
+      "cover_photo": "/assets/places/cafenoir.jpg",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJWyONO5Ei9mJ8Xw9rokxQI_Muz_9G22IW0A&s",
+      "description": "Explore hidden gems and traditional flavors in Cafe",
+      "media": [
+        "/assets/places/cafenoir-1.jpg",
+        "/assets/places/cafenoir-2.jpg"
       ],
-      "photos": [
-        "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=400&h=300&fit=crop"
-      ]
+      "coordinates": { "lat": 25.2048, "lng": 55.2708 },
+      "summary": "Classic cinematic café with traditional Arabic coffee and modern ambiance",
+      "checkins_count": 89,
+      "saved_count": 234,
+      "category": "Food & Drink"
     },
     {
       "id": "p3",
-      "name": "Santorini Blue Domes",
-      "location": "Oia, Santorini",
-      "rating": 4.9,
-      "reviews": 2156,
-      "price": "Free",
-      "image": "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&h=600&fit=crop",
-      "description": "Famous blue-domed churches with breathtaking sunset views over the Aegean Sea.",
-      "visitingHours": {
-        "daily": "24/7 Access",
-        "prime": "6:00 PM - 8:00 PM"
-      },
-      "facts": [
-        {"icon": "🌅", "text": "World's most famous sunset viewing spot"},
-        {"icon": "🏛️", "text": "Traditional Cycladic architecture"}
-      ],
-      "photos": [
-        "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=400&h=300&fit=crop"
-      ]
-    },
-    {
-      "id": "p4",
-      "name": "Kyoto Bamboo Grove",
-      "location": "Arashiyama, Kyoto",
+      "name": "Galata Tower",
+      "type": "landmark",
+      "city": "Istanbul",
+      "country": "Turkey",
       "rating": 4.7,
-      "reviews": 1834,
-      "price": "Free",
-      "image": "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&h=600&fit=crop",
-      "description": "Enchanting bamboo forest creating natural tunnels of towering green stalks.",
-      "visitingHours": {
-        "daily": "24/7 Access",
-        "prime": "6:00 AM - 8:00 AM"
-      },
-      "facts": [
-        {"icon": "🎋", "text": "Thousands of bamboo stalks create natural acoustics"},
-        {"icon": "🌿", "text": "UNESCO World Heritage site area"}
-      ],
-      "photos": [
-        "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=300&fit=crop"
-      ]
-    },
-    {
-      "id": "p5",
-      "name": "Machu Picchu",
-      "location": "Cusco Region, Peru",
-      "rating": 4.9,
-      "reviews": 4567,
-      "price": "$75/person",
-      "image": "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=800&h=600&fit=crop",
-      "description": "Ancient Incan citadel set high in the Andes Mountains, a UNESCO World Heritage site.",
-      "visitingHours": {
-        "daily": "6:00 AM - 5:30 PM",
-        "prime": "6:00 AM - 8:00 AM"
-      },
-      "facts": [
-        {"icon": "🏔️", "text": "Built around 1450 at 2,430 meters altitude"},
-        {"icon": "🏛️", "text": "One of the New Seven Wonders of the World"}
-      ],
-      "photos": [
-        "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=400&h=300&fit=crop"
-      ]
-    },
-    {
-      "id": "p6",
-      "name": "Taj Mahal",
-      "location": "Agra, India",
-      "rating": 4.8,
-      "reviews": 6789,
-      "price": "$15/person",
-      "image": "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&h=600&fit=crop",
-      "description": "Magnificent white marble mausoleum, symbol of eternal love and architectural masterpiece.",
-      "visitingHours": {
-        "daily": "6:00 AM - 6:30 PM",
-        "prime": "6:00 AM - 8:00 AM"
-      },
-      "facts": [
-        {"icon": "💎", "text": "Built with white marble and precious stones"},
-        {"icon": "💕", "text": "Monument to eternal love built by Shah Jahan"}
-      ],
-      "photos": [
-        "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1548013146-72479768bada?w=400&h=300&fit=crop"
-      ]
-    },
-    {
-      "id": "p7",
-      "name": "Northern Lights Iceland",
-      "location": "Reykjavik, Iceland",
-      "rating": 4.9,
-      "reviews": 2345,
-      "price": "$120/person",
-      "image": "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&h=600&fit=crop",
-      "description": "Spectacular aurora borealis dancing across the Arctic sky in vibrant colors.",
-      "visitingHours": {
-        "daily": "9:00 PM - 2:00 AM",
-        "prime": "10:00 PM - 12:00 AM"
-      },
-      "facts": [
-        {"icon": "💚", "text": "Best viewing from September to March"},
-        {"icon": "🌌", "text": "Caused by solar particles hitting Earth's atmosphere"}
-      ],
-      "photos": [
-        "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop"
-      ]
-    },
-    {
-      "id": "p8",
-      "name": "Great Wall of China",
-      "location": "Beijing, China",
-      "rating": 4.7,
-      "reviews": 8901,
-      "price": "$10/person",
-      "image": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&h=600&fit=crop",
-      "description": "Ancient fortification stretching over 13,000 miles across northern China.",
-      "visitingHours": {
-        "daily": "7:30 AM - 5:30 PM",
-        "prime": "8:00 AM - 10:00 AM"
-      },
-      "facts": [
-        {"icon": "🏯", "text": "Over 13,000 miles long ancient fortification"},
-        {"icon": "🧱", "text": "Built over several dynasties spanning 2,000+ years"}
-      ],
-      "photos": [
-        "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400&h=300&fit=crop"
-      ]
-    },
-    {
-      "id": "p9",
-      "name": "Colosseum Rome",
-      "location": "Rome, Italy",
-      "rating": 4.6,
-      "reviews": 7234,
-      "price": "$25/person",
-      "image": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&h=600&fit=crop",
-      "description": "Ancient Roman amphitheater, largest ever built, iconic symbol of Imperial Rome.",
-      "visitingHours": {
-        "daily": "8:30 AM - 7:15 PM",
-        "prime": "8:30 AM - 10:00 AM"
-      },
-      "facts": [
-        {"icon": "🏛️", "text": "Could hold 50,000-80,000 spectators"},
-        {"icon": "⚔️", "text": "Hosted gladiatorial contests and public spectacles"}
-      ],
-      "photos": [
-        "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop"
-      ]
-    },
-    {
-      "id": "p10",
-      "name": "Bali Rice Terraces",
-      "location": "Jatiluwih, Bali",
-      "rating": 4.8,
-      "reviews": 1567,
-      "price": "$5/person",
-      "image": "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=800&h=600&fit=crop",
-      "description": "Ancient terraced rice fields creating stunning green landscapes in UNESCO heritage site.",
-      "visitingHours": {
-        "daily": "6:00 AM - 6:00 PM",
-        "prime": "6:00 AM - 8:00 AM"
-      },
-      "facts": [
-        {"icon": "🌾", "text": "Traditional Subak irrigation system over 1,000 years old"},
-        {"icon": "🌄", "text": "UNESCO World Heritage cultural landscape"}
-      ],
-      "photos": [
-        "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop"
-      ]
+      "image": "https://www.travelure.in/wp-content/uploads/2021/04/Galata-Tower-6.jpg",
+      "description": "Ancient Roman Tower ",
+      "cover_photo": "/assets/places/galata.jpg",
+      "media": ["/assets/places/galata-1.jpg", "/assets/places/galata-2.jpg"],
+      "coordinates": { "lat": 41.0256, "lng": 28.9744 },
+      "summary": "Medieval stone tower offering panoramic views of Istanbul",
+      "checkins_count": 456,
+      "saved_count": 789,
+      "category": "Landmark"
     }
   ],
   "activities": [

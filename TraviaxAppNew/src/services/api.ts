@@ -127,6 +127,11 @@ class ApiService {
   async getActivityById(activityId: string): Promise<any> {
     return this.makeRequest<any>(`/activities/${activityId}`);
   }
+
+  async searchExplore(query: string): Promise<any[]> {
+    const searchParams = new URLSearchParams({q: query});
+    return this.makeRequest<any[]>(`/search?${searchParams.toString()}`);
+  }
 }
 
 export const apiService = new ApiService();

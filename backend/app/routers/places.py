@@ -2,12 +2,27 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import Optional, List
 import uuid
 from datetime import datetime
+import json
+from pathlib import Path
 
 from app.models.schemas import Place, APIResponse, Checkin
 from app.services.json_store import json_store
 from app.routers.auth import get_current_user, User
 
 router = APIRouter()
+
+def load_mock_places() -> List[dict]:
+    try:
+        mock_file_path = Path(__file__).parent.parent.parent / "mock_data" / "mock.json"
+        with open(mock_file_path, "r", encoding="utf-8") as mock_file:
+            mock_data = json.load(mock_file)
+        return mock_data.get("places", [])
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=500, detail="Mock data file not found") from exc
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=500, detail="Invalid JSON in mock data file") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Error loading mock places: {exc}") from exc
 
 @router.get("", response_model=APIResponse)
 async def search_places(
@@ -17,20 +32,25 @@ async def search_places(
     limit: int = Query(20, ge=1, le=100)
 ):
     """Search and filter places"""
-    places = await json_store.get_collection("places")
-    
+    places = load_mock_places()
+
     # Apply filters
     if query:
         places = [p for p in places if 
                  query.lower() in p.get("name", "").lower() or 
-                 query.lower() in p.get("summary", "").lower()]
-    
+                 query.lower() in p.get("summary", "").lower() or
+                 query.lower() in p.get("location", "").lower()]
+
     if city:
-        places = [p for p in places if p.get("city", "").lower() == city.lower()]
-    
+        places = [
+            p for p in places
+            if p.get("city", "").lower() == city.lower()
+            or city.lower() in p.get("location", "").lower()
+        ]
+
     if category:
         places = [p for p in places if p.get("category", "").lower() == category.lower()]
-    
+
     # Sort by rating
     places.sort(key=lambda x: x.get("rating", 0), reverse=True)
     
