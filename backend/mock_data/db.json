@@ -471,6 +471,51 @@
       "description": "Iconic blue domes and sunset views",
       "rating": 4.8,
       "visitors": "1.8M"
+    },
+    {
+      "id": "tp3",
+      "name": "Machu Picchu",
+      "country": "Peru",
+      "image": "https://images.unsplash.com/photo-1509112756314-34a0badb29d4?w=400&h=350&fit=crop",
+      "description": "Ancient Incan citadel in the Andes",
+      "rating": 4.9,
+      "visitors": "1.2M"
+    },
+    {
+      "id": "tp4",
+      "name": "Bali",
+      "country": "Indonesia",
+      "image": "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400&h=350&fit=crop",
+      "description": "Rice terraces, temples and beaches",
+      "rating": 4.7,
+      "visitors": "2.3M"
+    },
+    {
+      "id": "tp5",
+      "name": "Paris",
+      "country": "France",
+      "image": "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=350&fit=crop",
+      "description": "City of lights, art and romance",
+      "rating": 4.8,
+      "visitors": "19M"
+    },
+    {
+      "id": "tp6",
+      "name": "Reykjavik",
+      "country": "Iceland",
+      "image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=350&fit=crop",
+      "description": "Gateway to Northern Lights and geysers",
+      "rating": 4.6,
+      "visitors": "2.3M"
+    },
+    {
+      "id": "tp7",
+      "name": "Marrakech",
+      "country": "Morocco",
+      "image": "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=400&h=350&fit=crop",
+      "description": "Colorful souks and historic medina",
+      "rating": 4.7,
+      "visitors": "3.1M"
     }
   ],
   "itineraries": [

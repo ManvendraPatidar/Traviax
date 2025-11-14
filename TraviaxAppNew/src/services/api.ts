@@ -116,6 +116,19 @@ class ApiService {
     return response;
   }
 
+  async getTrendingPlaces(): Promise<any[]> {
+    return this.makeRequest<any[]>('/trending-places');
+  }
+
+  async getHomeItineraries(limit: number = 6): Promise<any[]> {
+    const params = new URLSearchParams({limit: String(limit)});
+    return this.makeRequest<any[]>(`/itineraries?${params.toString()}`);
+  }
+
+  async getItineraryById(itineraryId: string): Promise<any> {
+    return this.makeRequest<any>(`/itineraries/${itineraryId}`);
+  }
+
   async getHotelById(hotelId: string): Promise<any> {
     return this.makeRequest<any>(`/hotels/${hotelId}`);
   }

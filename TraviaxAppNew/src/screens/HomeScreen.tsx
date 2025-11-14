@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,11 @@ import {
   TouchableOpacity,
   ImageBackground,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import debounce from 'lodash.debounce';
+import {apiService} from '../services/api';
 
 interface HomeScreenProps {
   navigation?: {
@@ -17,7 +20,228 @@ interface HomeScreenProps {
   };
 }
 
+interface TrendingPlace {
+  id: string;
+  name: string;
+  country?: string;
+  image?: string;
+  description?: string;
+  rating?: number;
+}
+
+interface ItinerarySummary {
+  id: string;
+  title: string;
+  location: string;
+  duration: string;
+  dateRange?: string;
+  heroImage?: string;
+  rating?: number;
+}
+
+const DEFAULT_PLACE_RATING = 4.5;
+
+const buildItemId = (value?: string | number) => {
+  if (value === undefined || value === null || value === '') {
+    return `generated-${Math.random().toString(36).slice(2)}`;
+  }
+  return String(value);
+};
+
+const getPrimaryImage = (item: any): string | undefined => {
+  if (item?.image) {
+    return item.image;
+  }
+
+  if (Array.isArray(item?.photos) && item.photos.length > 0) {
+    return item.photos[0];
+  }
+
+  if (Array.isArray(item?.media) && item.media.length > 0) {
+    return item.media[0];
+  }
+
+  return undefined;
+};
+
+const coerceNumber = (value: any, fallback: number) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const mapTrendingPlaceFromApi = (item: any): TrendingPlace => ({
+  id: buildItemId(item?.id ?? item?.name ?? item?.title),
+  name: item?.name ?? item?.title ?? 'Cinematic Getaway',
+  country: item?.country ?? item?.location ?? item?.city ?? item?.region,
+  image: getPrimaryImage(item),
+  description: item?.description,
+  rating: coerceNumber(item?.rating, DEFAULT_PLACE_RATING),
+});
+
+const mapTrendingPlaceFromSearch = (item: any): TrendingPlace => {
+  const typePrefix = item?.type ?? 'result';
+  const fallbackId = Math.random().toString(36).slice(2);
+  const composedId = `${typePrefix}-${item?.id ?? fallbackId}`;
+  const rawType = item?.type ? String(item.type) : undefined;
+  const typeLabel = rawType
+    ? `${rawType.charAt(0).toUpperCase()}${rawType.slice(1)}`
+    : undefined;
+
+  return {
+    id: buildItemId(composedId),
+    name: item?.title ?? item?.name ?? 'Discover More',
+    country: item?.location ?? typeLabel,
+    image: getPrimaryImage(item),
+    description: item?.description,
+    rating: coerceNumber(item?.rating, DEFAULT_PLACE_RATING),
+  };
+};
+
+const mapItineraryFromApi = (item: any): ItinerarySummary => ({
+  id: buildItemId(item?.id ?? item?.title),
+  title: item?.title ?? 'Curated Journey',
+  location: item?.location ?? 'Global Adventure',
+  duration: item?.duration ?? '',
+  dateRange: item?.dateRange,
+  heroImage: item?.heroImage,
+  rating: coerceNumber(item?.rating, DEFAULT_PLACE_RATING),
+});
+
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [trendingPlaces, setTrendingPlaces] = useState<TrendingPlace[]>([]);
+  const [trendingLoading, setTrendingLoading] = useState(true);
+  const [trendingError, setTrendingError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<TrendingPlace[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [itineraries, setItineraries] = useState<ItinerarySummary[]>([]);
+  const [itineraryLoading, setItineraryLoading] = useState(true);
+  const [itineraryError, setItineraryError] = useState<string | null>(null);
+
+  const loadTrendingPlaces = useCallback(async () => {
+    try {
+      setTrendingLoading(true);
+      setTrendingError(null);
+      const response = await apiService.getTrendingPlaces();
+      setTrendingPlaces(response.map(mapTrendingPlaceFromApi));
+    } catch (error) {
+      console.error('Failed to load trending places:', error);
+      setTrendingError('Unable to load trending places');
+      setTrendingPlaces([]);
+    } finally {
+      setTrendingLoading(false);
+    }
+  }, []);
+
+  const loadItineraries = useCallback(async () => {
+    try {
+      setItineraryLoading(true);
+      setItineraryError(null);
+      const response = await apiService.getHomeItineraries(6);
+      setItineraries(response.map(mapItineraryFromApi));
+    } catch (error) {
+      console.error('Failed to load itineraries:', error);
+      setItineraryError('Unable to load itineraries');
+      setItineraries([]);
+    } finally {
+      setItineraryLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadTrendingPlaces();
+    loadItineraries();
+  }, [loadTrendingPlaces, loadItineraries]);
+
+  const buildTrendingPlaceDetails = useCallback((place: TrendingPlace) => {
+    const ratingValue = coerceNumber(place.rating, DEFAULT_PLACE_RATING);
+    return {
+      id: place.id,
+      name: place.name,
+      location: place.country ?? 'Worldwide',
+      rating: ratingValue,
+      reviews: Math.floor(Math.random() * 500) + 200,
+      image: place.image,
+      description:
+        place.description ??
+        `${place.name} - Experience cinematic travel moments around the globe.`,
+      visitingHours: {
+        daily: '9:00 AM - 8:00 PM',
+        prime: '10:00 AM - 6:00 PM',
+      },
+      facts: [
+        {
+          icon: '🌟',
+          text: `Rated ${ratingValue.toFixed(1)} stars by our community.`,
+        },
+        {
+          icon: '📸',
+          text: 'Perfect backdrop for cinematic travel storytelling.',
+        },
+      ],
+      photos: place.image ? [place.image] : [],
+    };
+  }, []);
+
+  const performSearch = useCallback(async (query: string) => {
+    try {
+      setSearchLoading(true);
+      setSearchError(null);
+      const results = await apiService.searchExplore(query);
+      setSearchResults(results.map(mapTrendingPlaceFromSearch));
+    } catch (error) {
+      console.error('Failed to fetch search results:', error);
+      setSearchError('Unable to fetch search results');
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value: string) => {
+        performSearch(value);
+      }, 400),
+    [performSearch],
+  );
+
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed) {
+      debouncedSearch.cancel();
+      setSearchResults([]);
+      setSearchError(null);
+      setSearchLoading(false);
+      return;
+    }
+    setSearchLoading(true);
+    debouncedSearch(trimmed);
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [searchQuery, debouncedSearch]);
+
+  useEffect(() => () => debouncedSearch.cancel(), [debouncedSearch]);
+
+  const handleSearchSubmit = useCallback(() => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed) {
+      setSearchResults([]);
+      setSearchError(null);
+      setSearchLoading(false);
+      return;
+    }
+    debouncedSearch.cancel();
+    performSearch(trimmed);
+  }, [searchQuery, debouncedSearch, performSearch]);
+
+  const isSearching = searchQuery.trim().length > 0;
+  const displayTrending = isSearching ? searchResults : trendingPlaces;
+  const displayTrendingLoading = isSearching ? searchLoading : trendingLoading;
+  const displayTrendingError = isSearching ? searchError : trendingError;
+
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
@@ -44,6 +268,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             style={styles.searchInput}
             placeholder="Plan a trip to Tokyo..."
             placeholderTextColor="#666666"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onSubmitEditing={handleSearchSubmit}
           />
         </View>
       </View>
@@ -150,142 +377,172 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       {/* Trending Places */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Trending Places</Text>
-        <View style={styles.placesRow}>
-          <TouchableOpacity
-            style={styles.placeCard}
-            onPress={() =>
-              navigation?.navigate('PlaceDetails', {
-                place: {
-                  id: '1',
-                  name: 'Kyoto Temple',
-                  location: 'Historic District, Kyoto',
-                  rating: 4.8,
-                  reviews: 1245,
-                  image:
-                    'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=600&fit=crop',
-                  description:
-                    "Kyoto Temple is a magnificent historic temple complex showcasing traditional Japanese architecture. Experience centuries of spiritual heritage and breathtaking gardens in the heart of Japan's ancient capital.",
-                  visitingHours: {
-                    daily: '6:00 AM - 6:00 PM',
-                    prime: '8:00 AM - 10:00 AM',
-                  },
-                  facts: [
-                    {
-                      icon: '🏛️',
-                      text: 'Built over 1,000 years ago during the Heian period.',
-                    },
-                    {
-                      icon: '🌸',
-                      text: 'Famous for its stunning cherry blossom displays in spring.',
-                    },
-                    {
-                      icon: '🧘',
-                      text: 'Active meditation sessions available for visitors.',
-                    },
-                  ],
-                  photos: [
-                    'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1480796927426-f609979314bd?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1542640244-7e672d6cef4e?w=400&h=300&fit=crop',
-                  ],
-                },
-              })
-            }>
-            <View style={styles.placeImage}>
-              <Text style={styles.placeEmoji}>🏯</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.placesRow}>
+          {displayTrendingLoading ? (
+            <View style={styles.placeCard}>
+              <View style={styles.centerContent}>
+                <ActivityIndicator color="#FFD700" />
+              </View>
             </View>
-            <Text style={styles.placeText}>Kyoto</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.placeCard}
-            onPress={() =>
-              navigation?.navigate('PlaceDetails', {
-                place: {
-                  id: '2',
-                  name: 'Sakura Gardens',
-                  location: 'Cherry Blossom Park, Tokyo',
-                  rating: 4.6,
-                  reviews: 892,
-                  image:
-                    'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=800&h=600&fit=crop',
-                  description:
-                    "Sakura Gardens offers one of Tokyo's most spectacular cherry blossom viewing experiences. Walk through thousands of blooming sakura trees and enjoy traditional Japanese tea ceremonies.",
-                  visitingHours: {
-                    daily: '5:00 AM - 9:00 PM',
-                    prime: '6:00 AM - 8:00 AM',
-                  },
-                  facts: [
-                    {
-                      icon: '🌸',
-                      text: 'Home to over 3,000 cherry blossom trees of 15 different varieties.',
-                    },
-                    {
-                      icon: '📸',
-                      text: 'Most photographed location during hanami season.',
-                    },
-                    {
-                      icon: '🍵',
-                      text: 'Traditional tea house with 400-year history on grounds.',
-                    },
-                  ],
-                  photos: [
-                    'https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1516205651411-aef33a44f7c2?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1583562835057-a62d1beffb8d?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1585159812596-fac104f2f069?w=400&h=300&fit=crop',
-                  ],
-                },
-              })
-            }>
-            <View style={styles.placeImage}>
-              <Text style={styles.placeEmoji}>🌸</Text>
+          ) : displayTrendingError ? (
+            <TouchableOpacity
+              style={styles.placeCard}
+              onPress={() => {
+                if (isSearching) {
+                  handleSearchSubmit();
+                } else {
+                  loadTrendingPlaces();
+                }
+              }}>
+              <View style={styles.centerContent}>
+                <Text style={styles.placeText}>{displayTrendingError}</Text>
+                <Text style={[styles.placeText, styles.retryText]}>
+                  Tap to retry
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ) : displayTrending.length === 0 ? (
+            <View style={styles.placeCard}>
+              <View style={styles.centerContent}>
+                <Text style={styles.placeText}>
+                  No places available right now
+                </Text>
+              </View>
             </View>
-            <Text style={styles.placeText}>Sakura</Text>
-          </TouchableOpacity>
-        </View>
+          ) : (
+            displayTrending.map(place => (
+              <TouchableOpacity
+                key={place.id}
+                style={styles.placeCard}
+                onPress={() =>
+                  navigation?.navigate('PlaceDetails', {
+                    place: buildTrendingPlaceDetails(place),
+                  })
+                }>
+                <View style={styles.placeImage}>
+                  {place.image ? (
+                    <ImageBackground
+                      source={{uri: place.image}}
+                      style={styles.placeImageBackground}
+                      imageStyle={styles.placeImageRadius}>
+                      <View style={styles.placeImageOverlay} />
+                    </ImageBackground>
+                  ) : (
+                    <View style={styles.placeImageFallback}>
+                      <Text style={styles.placeEmoji}>🌍</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.placeText}>{place.name}</Text>
+                {(place.country || place.description) && (
+                  <Text style={[styles.placeText, styles.placeMetaText]}>
+                    {place.country ?? place.description}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ))
+          )}
+        </ScrollView>
       </View>
 
       {/* Best Trip Itinerary */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Best Trip Itinerary</Text>
         <View style={styles.itineraryList}>
-          <TouchableOpacity
-            style={styles.itineraryItem}
-            onPress={() => navigation?.navigate('ItineraryDetails')}>
-            <View style={styles.itineraryImage}>
-              <Text style={styles.itineraryEmoji}>⛵</Text>
+          {itineraryLoading ? (
+            <View style={styles.itineraryItem}>
+              <View style={styles.itineraryLoadingContainer}>
+                <ActivityIndicator color="#FFD700" />
+                <Text
+                  style={[
+                    styles.itinerarySubtitle,
+                    styles.itineraryLoadingText,
+                  ]}>
+                  Loading itineraries...
+                </Text>
+              </View>
             </View>
-            <View style={styles.itineraryInfo}>
-              <Text style={styles.itineraryTitle}>Parisian Dream</Text>
-              <Text style={styles.itinerarySubtitle}>Stay at Eiffel</Text>
-              <Text style={styles.itineraryRating}>⭐ 4.9</Text>
+          ) : itineraryError ? (
+            <TouchableOpacity
+              style={styles.itineraryItem}
+              onPress={loadItineraries}>
+              <View style={styles.itineraryImage}>
+                <Text style={styles.itineraryEmoji}>🔄</Text>
+              </View>
+              <View style={styles.itineraryInfo}>
+                <Text style={styles.itineraryTitle}>{itineraryError}</Text>
+                <Text
+                  style={[styles.itinerarySubtitle, styles.itineraryRetryText]}>
+                  Tap to retry
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ) : itineraries.length === 0 ? (
+            <View style={styles.itineraryItem}>
+              <View style={styles.itineraryImage}>
+                <Text style={styles.itineraryEmoji}>🧭</Text>
+              </View>
+              <View style={styles.itineraryInfo}>
+                <Text style={styles.itineraryTitle}>
+                  No itineraries available yet
+                </Text>
+                <Text
+                  style={[
+                    styles.itinerarySubtitle,
+                    styles.itineraryEmptySubtitle,
+                  ]}>
+                  Check back soon for curated trips.
+                </Text>
+              </View>
             </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.itineraryItem}
-            onPress={() => navigation?.navigate('ItineraryDetails')}>
-            <View style={styles.itineraryImage}>
-              <Text style={styles.itineraryEmoji}>🏛️</Text>
-            </View>
-            <View style={styles.itineraryInfo}>
-              <Text style={styles.itineraryTitle}>Roman Holiday</Text>
-              <Text style={styles.itinerarySubtitle}>Ancient Rome</Text>
-              <Text style={styles.itineraryRating}>⭐ 4.8</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.itineraryItem}
-            onPress={() => navigation?.navigate('ItineraryDetails')}>
-            <View style={styles.itineraryImage}>
-              <Text style={styles.itineraryEmoji}>🗼</Text>
-            </View>
-            <View style={styles.itineraryInfo}>
-              <Text style={styles.itineraryTitle}>Tokyo Explorer</Text>
-              <Text style={styles.itinerarySubtitle}>Modern Japan</Text>
-              <Text style={styles.itineraryRating}>⭐ 4.9</Text>
-            </View>
-          </TouchableOpacity>
+          ) : (
+            itineraries.slice(0, 4).map(itinerary => {
+              const ratingValue =
+                typeof itinerary.rating === 'number'
+                  ? itinerary.rating
+                  : Number(itinerary.rating ?? 0);
+              const ratingLabel = ratingValue ? ratingValue.toFixed(1) : '4.8';
+              return (
+                <TouchableOpacity
+                  key={itinerary.id}
+                  style={styles.itineraryItem}
+                  onPress={() =>
+                    navigation?.navigate('ItineraryDetails', {
+                      itineraryId: itinerary.id,
+                    })
+                  }>
+                  <View style={styles.itineraryImage}>
+                    {itinerary.heroImage ? (
+                      <ImageBackground
+                        source={{uri: itinerary.heroImage}}
+                        style={styles.itineraryHeroImage}
+                        imageStyle={styles.itineraryHeroImageRadius}
+                      />
+                    ) : (
+                      <Text style={styles.itineraryEmoji}>🧭</Text>
+                    )}
+                  </View>
+                  <View style={styles.itineraryInfo}>
+                    <Text style={styles.itineraryTitle}>{itinerary.title}</Text>
+                    <Text style={styles.itinerarySubtitle}>
+                      {itinerary.duration}
+                      {itinerary.location
+                        ? ` in ${itinerary.location.split(',')[0]}`
+                        : ''}
+                    </Text>
+                    <View style={styles.itineraryRatingContainer}>
+                      <Text style={styles.itineraryRating}>
+                        {`⭐ ${ratingLabel}`}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
         </View>
       </View>
     </ScrollView>
@@ -439,19 +696,41 @@ const styles = StyleSheet.create({
   placesRow: {
     flexDirection: 'row',
     gap: 12,
+    paddingHorizontal: 4,
   },
   placeCard: {
-    flex: 1,
+    width: 120,
     alignItems: 'center',
+    marginRight: 12,
   },
   placeImage: {
-    width: 80,
-    height: 80,
+    width: 120,
+    height: 120,
     borderRadius: 12,
     backgroundColor: '#2A2A2A',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    overflow: 'hidden',
+  },
+  placeImageBackground: {
+    width: '100%',
+    height: '100%',
+  },
+  placeImageRadius: {
+    borderRadius: 12,
+  },
+  placeImageOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    borderRadius: 12,
+  },
+  placeImageFallback: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#2A2A2A',
+    borderRadius: 12,
   },
   placeEmoji: {
     fontSize: 24,
@@ -460,6 +739,22 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '500',
+    textAlign: 'center',
+  },
+  placeMetaText: {
+    color: '#999999',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  retryText: {
+    color: '#FFD700',
+    marginTop: 4,
   },
   itineraryList: {
     gap: 12,
@@ -495,9 +790,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 4,
   },
+  itineraryEmptySubtitle: {
+    color: '#AAAAAA',
+  },
   itineraryRating: {
     color: '#FFD700',
     fontSize: 12,
+  },
+  itineraryLoadingContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  itineraryLoadingText: {
+    marginLeft: 8,
+  },
+  itineraryRetryText: {
+    color: '#FFD700',
+  },
+  itineraryHeroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  itineraryHeroImageRadius: {
+    borderRadius: 8,
+  },
+  itineraryRatingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   // Hero section styles
   heroImage: {

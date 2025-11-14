@@ -68,7 +68,12 @@ const SimpleNavigator = () => {
       return <GiftScreen navigation={navigation} />;
     }
     if (currentScreen === 'ItineraryDetails') {
-      return <ItineraryDetailsScreen navigation={navigation} />;
+      return (
+        <ItineraryDetailsScreen
+          route={{params: screenParams}}
+          navigation={navigation}
+        />
+      );
     }
     if (currentScreen === 'Booking') {
       return <BookingScreen navigation={navigation} />;

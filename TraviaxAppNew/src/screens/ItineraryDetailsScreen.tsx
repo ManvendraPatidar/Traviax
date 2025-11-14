@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,17 @@ import {
   Image,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import {apiService} from '../services/api';
 
 interface ItineraryDetailsScreenProps {
   navigation: {
     navigate: (screen: string, params?: any) => void;
     goBack: () => void;
+  };
+  route?: {
+    params?: {
+      itineraryId?: string;
+    };
   };
 }
 
@@ -34,135 +40,76 @@ interface Day {
   expanded: boolean;
 }
 
-const ItineraryDetailsScreen: React.FC<ItineraryDetailsScreenProps> = ({navigation}) => {
-  const [days, setDays] = useState<Day[]>([
-    {
-      day: 1,
-      title: 'Historic Temples & Gion',
-      date: 'Oct 26',
-      locations: 4,
-      activities: [
-        {
-          time: 'MORNING',
-          title: 'Kiyomizu-dera Temple',
-          description: 'Iconic wooden temple with city views',
-          image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'LATE MORNING',
-          title: 'Sannenzaka & Ninenzaka',
-          description: 'Stroll through preserved historic streets',
-          image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'EVENING',
-          title: 'Gion District',
-          description: 'Explore the famous geisha district',
-          image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop',
-        },
-      ],
-      expanded: true,
-    },
-    {
-      day: 2,
-      title: 'Arashiyama Bamboo Grove',
-      date: 'Oct 27',
-      locations: 4,
-      activities: [
-        {
-          time: 'MORNING',
-          title: 'Bamboo Grove Walk',
-          description: 'Stroll through the famous bamboo forest',
-          image: 'https://images.unsplash.com/photo-1478436127897-769e1b3f0f36?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'LATE MORNING',
-          title: 'Tenryu-ji Temple',
-          description: 'Historic Zen temple with beautiful gardens',
-          image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'AFTERNOON',
-          title: 'Togetsukyo Bridge',
-          description: 'Iconic bridge with mountain views',
-          image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'EVENING',
-          title: 'Monkey Park Iwatayama',
-          description: 'Mountain park with city views and monkeys',
-          image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop',
-        },
-      ],
-      expanded: false,
-    },
-    {
-      day: 3,
-      title: 'Fushimi Inari Shrine',
-      date: 'Oct 28',
-      locations: 3,
-      activities: [
-        {
-          time: 'EARLY MORNING',
-          title: 'Fushimi Inari Hike',
-          description: 'Climb through thousands of torii gates',
-          image: 'https://images.unsplash.com/photo-1478436127897-769e1b3f0f36?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'AFTERNOON',
-          title: 'Fushimi Sake District',
-          description: 'Traditional sake brewing district tour',
-          image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'EVENING',
-          title: 'Gekkeikan Okura Museum',
-          description: 'Learn about sake history and tasting',
-          image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=300&fit=crop',
-        },
-      ],
-      expanded: false,
-    },
-    {
-      day: 4,
-      title: 'Golden Pavilion & Departure',
-      date: 'Oct 29',
-      locations: 5,
-      activities: [
-        {
-          time: 'MORNING',
-          title: 'Kinkaku-ji (Golden Pavilion)',
-          description: 'Famous golden temple reflected in pond',
-          image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'LATE MORNING',
-          title: 'Ryoan-ji Temple',
-          description: 'Famous rock garden meditation temple',
-          image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'AFTERNOON',
-          title: 'Nijo Castle',
-          description: 'Historic shogun palace with gardens',
-          image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'LATE AFTERNOON',
-          title: 'Kyoto Station Shopping',
-          description: 'Last-minute souvenir shopping',
-          image: 'https://images.unsplash.com/photo-1478436127897-769e1b3f0f36?w=400&h=300&fit=crop',
-        },
-        {
-          time: 'EVENING',
-          title: 'Departure',
-          description: 'Transfer to airport for departure',
-          image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=300&fit=crop',
-        },
-      ],
-      expanded: false,
-    },
-  ]);
+const DEFAULT_HEADER_IMAGE =
+  'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=400&fit=crop';
+const DEFAULT_LOCATION = 'Kyoto, Japan';
+const DEFAULT_TITLE = '4 Days in Kyoto';
+const DEFAULT_DATES = 'October 26 - October 29';
+
+const ItineraryDetailsScreen: React.FC<ItineraryDetailsScreenProps> = ({
+  navigation,
+  route,
+}) => {
+  // Header state (dynamic but same UI)
+  const [headerImage, setHeaderImage] = useState<string>(DEFAULT_HEADER_IMAGE);
+  const [headerLocation, setHeaderLocation] =
+    useState<string>(DEFAULT_LOCATION);
+  const [tripTitle, setTripTitle] = useState<string>(DEFAULT_TITLE);
+  const [tripDates, setTripDates] = useState<string>(DEFAULT_DATES);
+
+  // Days state
+  const [days, setDays] = useState<Day[]>([]);
+
+  useEffect(() => {
+    const itineraryId = route?.params?.itineraryId;
+    if (!itineraryId) {
+      return;
+    }
+    let isCancelled = false;
+    const fetchItinerary = async () => {
+      try {
+        const itinerary = await apiService.getItineraryById(itineraryId);
+        if (isCancelled || !itinerary) return;
+
+        // Header details
+        setHeaderImage(itinerary.heroImage || DEFAULT_HEADER_IMAGE);
+        setHeaderLocation(itinerary.location || DEFAULT_LOCATION);
+        setTripTitle(itinerary.title || DEFAULT_TITLE);
+        setTripDates(itinerary.dateRange || DEFAULT_DATES);
+
+        // Map days to UI shape
+        const mappedDays: Day[] = (itinerary.days || []).map(
+          (d: any, index: number) => ({
+            day: d?.day ?? index + 1,
+            title: d?.title ?? '',
+            date: d?.date ?? '',
+            locations:
+              d?.locationCount ??
+              d?.locations ??
+              (Array.isArray(d?.activities) ? d.activities.length : 0),
+            activities: Array.isArray(d?.activities)
+              ? d.activities.map((a: any) => ({
+                  time: a?.time ?? '',
+                  title: a?.name ?? a?.title ?? '',
+                  description: a?.description ?? '',
+                  image:
+                    a?.image ||
+                    'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=300&fit=crop',
+                }))
+              : [],
+            expanded: index === 0,
+          }),
+        );
+        setDays(mappedDays);
+      } catch (e) {
+        console.log('Failed to load itinerary details', e);
+      }
+    };
+    fetchItinerary();
+    return () => {
+      isCancelled = true;
+    };
+  }, [route?.params?.itineraryId]);
 
   const toggleDay = (dayIndex: number) => {
     setDays(prevDays =>
@@ -195,14 +142,22 @@ const ItineraryDetailsScreen: React.FC<ItineraryDetailsScreenProps> = ({navigati
         style={styles.dayHeader}
         onPress={() => toggleDay(index)}>
         <View style={styles.dayHeaderLeft}>
-          <Text style={styles.dayTitle}>Day {day.day}: {day.title}</Text>
-          <Text style={styles.daySubtitle}>{day.date} • {day.locations} locations</Text>
+          <Text style={styles.dayTitle}>
+            Day {day.day}: {day.title}
+          </Text>
+          <Text style={styles.daySubtitle}>
+            {day.date} • {day.locations} locations
+          </Text>
         </View>
-        <Text style={[styles.expandIcon, {transform: [{rotate: day.expanded ? '180deg' : '0deg'}]}]}>
+        <Text
+          style={[
+            styles.expandIcon,
+            {transform: [{rotate: day.expanded ? '180deg' : '0deg'}]},
+          ]}>
           ▲
         </Text>
       </TouchableOpacity>
-      
+
       {day.expanded && (
         <View style={styles.dayContent}>
           {day.activities.map(renderActivity)}
@@ -216,9 +171,7 @@ const ItineraryDetailsScreen: React.FC<ItineraryDetailsScreenProps> = ({navigati
       {/* Header with Background Image */}
       <View style={styles.headerContainer}>
         <ImageBackground
-          source={{
-            uri: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=400&fit=crop',
-          }}
+          source={{uri: headerImage}}
           style={styles.headerBackground}
           imageStyle={styles.headerImageStyle}>
           <LinearGradient
@@ -226,10 +179,12 @@ const ItineraryDetailsScreen: React.FC<ItineraryDetailsScreenProps> = ({navigati
             style={styles.headerGradient}>
             {/* Navigation */}
             <View style={styles.headerNav}>
-              <TouchableOpacity onPress={navigation.goBack} style={styles.backButton}>
+              <TouchableOpacity
+                onPress={navigation.goBack}
+                style={styles.backButton}>
                 <Text style={styles.backIcon}>←</Text>
               </TouchableOpacity>
-              <Text style={styles.headerLocation}>Kyoto, Japan</Text>
+              <Text style={styles.headerLocation}>{headerLocation}</Text>
               <TouchableOpacity style={styles.shareButton}>
                 <Text style={styles.shareIcon}>⤴</Text>
               </TouchableOpacity>
@@ -237,8 +192,8 @@ const ItineraryDetailsScreen: React.FC<ItineraryDetailsScreenProps> = ({navigati
 
             {/* Trip Info */}
             <View style={styles.tripInfo}>
-              <Text style={styles.tripTitle}>4 Days in Kyoto</Text>
-              <Text style={styles.tripDates}>October 26 - October 29</Text>
+              <Text style={styles.tripTitle}>{tripTitle}</Text>
+              <Text style={styles.tripDates}>{tripDates}</Text>
             </View>
 
             {/* Save Button */}
@@ -252,7 +207,9 @@ const ItineraryDetailsScreen: React.FC<ItineraryDetailsScreenProps> = ({navigati
       </View>
 
       {/* Days List */}
-      <ScrollView style={styles.daysContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.daysContainer}
+        showsVerticalScrollIndicator={false}>
         {days.map(renderDay)}
       </ScrollView>
     </SafeAreaView>

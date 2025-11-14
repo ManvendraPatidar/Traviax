@@ -19,6 +19,20 @@ def load_mock_data() -> Dict[str, Any]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading mock data: {str(e)}")
 
+
+def load_db_data() -> Dict[str, Any]:
+    """Load richer home screen data from db.json file"""
+    try:
+        db_file_path = Path(__file__).parent.parent.parent / "mock_data" / "db.json"
+        with open(db_file_path, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=500, detail="Home data file not found") from exc
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=500, detail="Invalid JSON in home data file") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Error loading home data: {exc}") from exc
+
 @router.get("/hotels")
 async def get_hotels() -> Dict[str, Any]:
     """Get all hotels from mock data"""
@@ -130,6 +144,73 @@ async def get_activities() -> Dict[str, Any]:
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/trending-places")
+async def get_trending_places() -> Dict[str, Any]:
+    """Return curated list of trending places for the home screen"""
+    try:
+        db_data = load_db_data()
+        trending_places = db_data.get("trending_places", [])
+
+        return {
+            "success": True,
+            "data": trending_places,
+            "count": len(trending_places)
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+@router.get("/itineraries/{itinerary_id}")
+async def get_itinerary_by_id(itinerary_id: str) -> Dict[str, Any]:
+    """Return full itinerary details by ID"""
+    try:
+        db_data = load_db_data()
+        itineraries = db_data.get("itineraries", [])
+        itinerary = next((i for i in itineraries if i.get("id") == itinerary_id), None)
+        if not itinerary:
+            raise HTTPException(status_code=404, detail="Itinerary not found")
+        return {
+            "success": True,
+            "data": itinerary
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.get("/itineraries")
+async def get_home_itineraries(limit: int = Query(6, ge=1, le=20)) -> Dict[str, Any]:
+    """Return summarized itineraries for home screen consumption"""
+    try:
+        db_data = load_db_data()
+        itineraries = db_data.get("itineraries", [])
+
+        summaries: List[Dict[str, Any]] = []
+        for itinerary in itineraries[:limit]:
+            summaries.append({
+                "id": itinerary.get("id"),
+                "title": itinerary.get("title"),
+                "location": itinerary.get("location"),
+                "duration": itinerary.get("duration"),
+                "dateRange": itinerary.get("dateRange"),
+                "heroImage": itinerary.get("heroImage"),
+                "rating": itinerary.get("rating"),
+                "price": itinerary.get("price"),
+                "currency": itinerary.get("currency"),
+            })
+
+        return {
+            "success": True,
+            "data": summaries,
+            "count": len(summaries)
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 @router.get("/hotels/{hotel_id}")
 async def get_hotel_by_id(hotel_id: str) -> Dict[str, Any]:
