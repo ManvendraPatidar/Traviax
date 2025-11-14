@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,9 @@ import {
   Image,
   SafeAreaView,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
+import {apiService} from '../services/api';
 
 const {width} = Dimensions.get('window');
 
@@ -142,19 +144,94 @@ interface ExploreScreenProps {
 const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Dynamic data states
+  const [hotels, setHotels] = useState<any[]>([]);
+  const [places, setPlaces] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
+
+  // Loading states
+  const [hotelsLoading, setHotelsLoading] = useState(true);
+  const [placesLoading, setPlacesLoading] = useState(true);
+  const [activitiesLoading, setActivitiesLoading] = useState(true);
+
+  // Error states
+  const [hotelsError, setHotelsError] = useState<string | null>(null);
+  const [placesError, setPlacesError] = useState<string | null>(null);
+  const [activitiesError, setActivitiesError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  const fetchAllData = async () => {
+    await Promise.all([fetchHotels(), fetchPlaces(), fetchActivities()]);
+  };
+
+  const fetchHotels = async () => {
+    try {
+      setHotelsLoading(true);
+      setHotelsError(null);
+      const data = await apiService.getHotels();
+      setHotels(data);
+    } catch (error) {
+      console.error('Error fetching hotels:', error);
+      setHotelsError('Failed to load hotels');
+      // Fallback to static data
+      setHotels(hotelsData);
+    } finally {
+      setHotelsLoading(false);
+    }
+  };
+
+  const fetchPlaces = async () => {
+    try {
+      setPlacesLoading(true);
+      setPlacesError(null);
+      const data = await apiService.getPlaces();
+      setPlaces(data);
+    } catch (error) {
+      console.error('Error fetching places:', error);
+      setPlacesError('Failed to load places');
+      // Fallback to static data
+      setPlaces(placesData);
+    } finally {
+      setPlacesLoading(false);
+    }
+  };
+
+  const fetchActivities = async () => {
+    try {
+      setActivitiesLoading(true);
+      setActivitiesError(null);
+      const data = await apiService.getActivities();
+      setActivities(data);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setActivitiesError('Failed to load activities');
+      // Fallback to static data
+      setActivities(activitiesData);
+    } finally {
+      setActivitiesLoading(false);
+    }
+  };
+
   const createPlaceData = (item: any) => ({
     id: item.id,
-    name: item.title,
-    location: item.description,
+    name: item.name || item.title,
+    location: item.location || item.description,
     rating: item.rating,
-    reviews: Math.floor(Math.random() * 1000) + 100,
-    image: item.image,
-    description: `${item.title} - ${item.description}. Experience the beauty and culture of this amazing destination with world-class amenities and unforgettable memories.`,
-    visitingHours: {
+    reviews: item.reviews || Math.floor(Math.random() * 1000) + 100,
+    image: item.image || (item.photos && item.photos[0]),
+    description:
+      item.description ||
+      `${
+        item.name || item.title
+      } - Experience the beauty and culture of this amazing destination.`,
+    visitingHours: item.visitingHours || {
       daily: '9:00 AM - 8:00 PM',
       prime: '10:00 AM - 6:00 PM',
     },
-    facts: [
+    facts: item.facts || [
       {
         icon: '🌟',
         text: `Rated ${item.rating} stars by thousands of visitors.`,
@@ -163,17 +240,8 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
         icon: '📍',
         text: 'Prime location with easy access to major attractions.',
       },
-      {
-        icon: '🎯',
-        text: 'Perfect for both leisure and adventure travelers.',
-      },
     ],
-    photos: [
-      item.image,
-      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&h=300&fit=crop',
-    ],
+    photos: item.photos || [item.image],
   });
 
   const renderPlaceCard = ({item}: {item: any}) => (
@@ -184,10 +252,13 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
           place: createPlaceData(item),
         });
       }}>
-      <Image source={{uri: item.image}} style={styles.cardImage} />
+      <Image
+        source={{uri: item.image || (item.photos && item.photos[0])}}
+        style={styles.cardImage}
+      />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={1}>
-          {item.title}
+          {item.name || item.title}
         </Text>
         <Text style={styles.cardDescription} numberOfLines={2}>
           {item.description}
@@ -213,7 +284,7 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
       <Image source={{uri: item.image}} style={styles.cardImage} />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={1}>
-          {item.title}
+          {item.name || item.title}
         </Text>
         <Text style={styles.cardDescription} numberOfLines={2}>
           {item.description}
@@ -233,7 +304,7 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
       <Image source={{uri: item.image}} style={styles.cardImage} />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={1}>
-          {item.title}
+          {item.name || item.title}
         </Text>
         <Text style={styles.cardDescription} numberOfLines={2}>
           {item.description}
@@ -248,7 +319,36 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
     </TouchableOpacity>
   );
 
-  const renderSection = (title: string, data: any[], icon: string) => {
+  const renderLoadingState = () => (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color="#FFD700" />
+      <Text style={styles.loadingText}>Loading...</Text>
+    </View>
+  );
+
+  const renderErrorState = (error: string, retryFunction: () => void) => (
+    <View style={styles.errorContainer}>
+      <Text style={styles.errorText}>{error}</Text>
+      <TouchableOpacity style={styles.retryButton} onPress={retryFunction}>
+        <Text style={styles.retryButtonText}>Retry</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderEmptyState = (message: string) => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>{message}</Text>
+    </View>
+  );
+
+  const renderSection = (
+    title: string,
+    data: any[],
+    icon: string,
+    loading: boolean,
+    error: string | null,
+    retryFunction: () => void,
+  ) => {
     const getRenderFunction = () => {
       switch (title) {
         case 'Places':
@@ -271,14 +371,23 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
             <Text style={styles.seeAllText}>See All</Text>
           </TouchableOpacity>
         </View>
-        <FlatList
-          data={data}
-          renderItem={getRenderFunction()}
-          keyExtractor={item => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalList}
-        />
+
+        {loading ? (
+          renderLoadingState()
+        ) : error ? (
+          renderErrorState(error, retryFunction)
+        ) : data.length === 0 ? (
+          renderEmptyState(`No ${title.toLowerCase()} available`)
+        ) : (
+          <FlatList
+            data={data}
+            renderItem={getRenderFunction()}
+            keyExtractor={item => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+          />
+        )}
       </View>
     );
   };
@@ -339,9 +448,30 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
         </View>
 
         {/* Sections */}
-        {renderSection('Places', placesData, '🏝️')}
-        {renderSection('Hotels', hotelsData, '🏨')}
-        {renderSection('Activities', activitiesData, '🎯')}
+        {renderSection(
+          'Places',
+          places,
+          '🏝️',
+          placesLoading,
+          placesError,
+          fetchPlaces,
+        )}
+        {renderSection(
+          'Hotels',
+          hotels,
+          '🏨',
+          hotelsLoading,
+          hotelsError,
+          fetchHotels,
+        )}
+        {renderSection(
+          'Activities',
+          activities,
+          '🎯',
+          activitiesLoading,
+          activitiesError,
+          fetchActivities,
+        )}
 
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
@@ -520,7 +650,55 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   bottomSpacing: {
-    height: 20,
+    height: 100,
+  },
+  // UI State Styles
+  loadingContainer: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: '#CCCCCC',
+    fontSize: 16,
+    marginTop: 10,
+  },
+  errorContainer: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    marginHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#FF4444',
+  },
+  errorText: {
+    color: '#FF4444',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  retryButton: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    color: '#888888',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 

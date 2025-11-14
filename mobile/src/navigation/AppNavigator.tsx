@@ -1,6 +1,9 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator, StackNavigationOptions } from "@react-navigation/stack";
+import {
+  createStackNavigator,
+  StackNavigationOptions,
+} from "@react-navigation/stack";
 import { TabNavigator } from "./TabNavigator";
 import { ReelDetailsScreen } from "@/screens/ReelDetailsScreen";
 import { ItineraryDetailScreen } from "@/screens/ItineraryDetailScreen";
@@ -44,8 +47,8 @@ export const AppNavigator: React.FC = () => {
         }}
       >
         <Stack.Screen name="Main" component={TabNavigator} />
-        <Stack.Screen 
-          name="ReelDetails" 
+        <Stack.Screen
+          name="ReelDetails"
           component={ReelDetailsScreen}
           options={{
             gestureEnabled: true,
@@ -66,24 +69,24 @@ export const AppNavigator: React.FC = () => {
             },
           }}
         />
-        <Stack.Screen 
-          name="ItineraryDetail" 
+        <Stack.Screen
+          name="ItineraryDetail"
           component={ItineraryDetailScreen}
           options={{
             gestureEnabled: true,
             gestureDirection: "horizontal",
           }}
         />
-        <Stack.Screen 
-          name="ExploreScreen" 
+        <Stack.Screen
+          name="ExploreScreen"
           component={ExploreScreen}
           options={{
             gestureEnabled: true,
             gestureDirection: "horizontal",
           }}
         />
-        <Stack.Screen 
-          name="Planner" 
+        <Stack.Screen
+          name="Planner"
           component={TripPlannerScreen}
           options={{
             gestureEnabled: true,

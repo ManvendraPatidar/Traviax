@@ -99,6 +99,34 @@ class ApiService {
   async getUserProfile(userId: string): Promise<UserProfile> {
     return this.makeRequest<UserProfile>(`/users/${userId}`);
   }
+
+  async getHotels(): Promise<any[]> {
+    const response = await this.makeRequest<any[]>('/hotels');
+    return response;
+  }
+
+  async getPlaces(): Promise<any[]> {
+    const response = await this.makeRequest<any[]>('/places');
+    console.log(response);
+    return response;
+  }
+
+  async getActivities(): Promise<any[]> {
+    const response = await this.makeRequest<any[]>('/activities');
+    return response;
+  }
+
+  async getHotelById(hotelId: string): Promise<any> {
+    return this.makeRequest<any>(`/hotels/${hotelId}`);
+  }
+
+  async getPlaceById(placeId: string): Promise<any> {
+    return this.makeRequest<any>(`/places/${placeId}`);
+  }
+
+  async getActivityById(activityId: string): Promise<any> {
+    return this.makeRequest<any>(`/activities/${activityId}`);
+  }
 }
 
 export const apiService = new ApiService();
