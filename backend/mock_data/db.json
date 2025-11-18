@@ -490,15 +490,7 @@
       "rating": 4.7,
       "visitors": "2.3M"
     },
-    {
-      "id": "tp5",
-      "name": "Paris",
-      "country": "France",
-      "image": "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=350&fit=crop",
-      "description": "City of lights, art and romance",
-      "rating": 4.8,
-      "visitors": "19M"
-    },
+
     {
       "id": "tp6",
       "name": "Reykjavik",

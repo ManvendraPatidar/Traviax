@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,11 @@ import {
   Dimensions,
   ActivityIndicator,
   Modal,
-  PanResponder,
+  Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import BackButton from '../components/BackButton';
+import {apiService} from '../services/api';
 
 const {width} = Dimensions.get('window');
 
@@ -38,9 +39,10 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
     'start',
   );
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const sliderWidth = useRef(280);
-  const isDragging = useRef(false);
-  const activeThumb = useRef<'min' | 'max' | null>(null);
+  const [destinationError, setDestinationError] = useState('');
+  const [datesError, setDatesError] = useState('');
+  const [budgetMinError, setBudgetMinError] = useState('');
+  const [budgetMaxError, setBudgetMaxError] = useState('');
 
   const preferences = [
     {key: 'Adventure', icon: '🥾'},
@@ -106,80 +108,80 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
     setSelectedDate(newDate);
   };
 
-  const updateSliderValue = (locationX: number, thumbType: 'min' | 'max') => {
-    const percentage = Math.max(
-      0,
-      Math.min(1, locationX / sliderWidth.current),
-    );
-    const newValue = Math.round(500 + percentage * 1500);
+  const handleBudgetMinChange = (value: string) => {
+    setBudgetMinError('');
+    setBudgetMaxError('');
 
-    if (thumbType === 'min' && newValue <= budgetMax - 100) {
-      setBudgetMin(newValue);
-    } else if (thumbType === 'max' && newValue >= budgetMin + 100) {
-      setBudgetMax(newValue);
+    const numValue = parseInt(value.replace(/[^0-9]/g, ''), 10);
+
+    if (isNaN(numValue) || value === '') {
+      setBudgetMin(0);
+      return;
     }
-  };
 
-  const createThumbPanResponder = (thumbType: 'min' | 'max') => {
-    let startValue = 0;
-
-    return PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        isDragging.current = true;
-        activeThumb.current = thumbType;
-        startValue = thumbType === 'min' ? budgetMin : budgetMax;
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        if (activeThumb.current !== thumbType) {
-          return;
-        }
-
-        const deltaValue = (gestureState.dx / sliderWidth.current) * 1500;
-        const newValue = Math.round(startValue + deltaValue);
-
-        if (thumbType === 'min') {
-          const clampedValue = Math.max(
-            500,
-            Math.min(budgetMax - 100, newValue),
-          );
-          setBudgetMin(clampedValue);
-        } else {
-          const clampedValue = Math.max(
-            budgetMin + 100,
-            Math.min(2000, newValue),
-          );
-          setBudgetMax(clampedValue);
-        }
-      },
-      onPanResponderRelease: () => {
-        isDragging.current = false;
-        activeThumb.current = null;
-      },
-    });
-  };
-
-  const minThumbPanResponder = createThumbPanResponder('min');
-  const maxThumbPanResponder = createThumbPanResponder('max');
-
-  const handleSliderTrackPress = (event: any) => {
-    const {locationX} = event.nativeEvent;
-    const percentage = locationX / sliderWidth.current;
-    const clickValue = 500 + percentage * 1500;
-
-    // Determine which thumb is closer to the click
-    const minDistance = Math.abs(clickValue - budgetMin);
-    const maxDistance = Math.abs(clickValue - budgetMax);
-
-    if (minDistance < maxDistance) {
-      updateSliderValue(locationX, 'min');
-    } else {
-      updateSliderValue(locationX, 'max');
+    if (numValue < 100) {
+      setBudgetMinError('Minimum budget should be at least $100');
+      return;
     }
+
+    if (numValue >= budgetMax) {
+      setBudgetMinError('Minimum budget should be less than maximum budget');
+      return;
+    }
+
+    setBudgetMin(numValue);
   };
 
-  const handleGenerateTrip = () => {
+  const handleBudgetMaxChange = (value: string) => {
+    setBudgetMinError('');
+    setBudgetMaxError('');
+
+    const numValue = parseInt(value.replace(/[^0-9]/g, ''), 10);
+
+    if (isNaN(numValue) || value === '') {
+      setBudgetMax(0);
+      return;
+    }
+
+    if (numValue > 50000) {
+      setBudgetMaxError('Maximum budget should not exceed $50,000');
+      return;
+    }
+
+    if (numValue <= budgetMin) {
+      setBudgetMaxError('Maximum budget should be greater than minimum budget');
+      return;
+    }
+
+    setBudgetMax(numValue);
+  };
+
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('en-US');
+  };
+
+  const handleGenerateTrip = async () => {
+    // Reset errors
+    setDestinationError('');
+    setDatesError('');
+
+    // Validate destination
+    const trimmedDestination = destination.trim();
+    if (!trimmedDestination) {
+      setDestinationError('Please enter a destination.');
+    }
+
+    // Validate dates
+    const hasValidDates = startDate !== 'Start date' && endDate !== 'End date';
+    if (!hasValidDates) {
+      setDatesError('Please select the trip dates.');
+    }
+
+    // If validation fails, don't proceed
+    if (!trimmedDestination || !hasValidDates) {
+      return;
+    }
+
     // Console log all form values
     console.log('=== TRIP PLAN FORM VALUES ===');
     console.log('Destination:', destination);
@@ -192,12 +194,47 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
     console.log('==============================');
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      navigation.navigate('ItineraryDetails', {
-        itineraryId: 'it1',
+
+    try {
+      // Show loading for 3 seconds before making API call
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Call the generate itinerary API
+      const tripData = {
+        destination: trimmedDestination,
+        startDate,
+        endDate,
+        budgetMin,
+        budgetMax,
+        numberOfTravelers:
+          selectedCompanion === 'Solo'
+            ? 1
+            : selectedCompanion === 'Couple'
+            ? 2
+            : 4,
+        travelType: selectedCompanion || 'Solo',
+        selectedPreferences,
+        flexibleDates,
+      };
+
+      const generatedItinerary = await apiService.generateItinerary(tripData);
+
+      console.log('Generated Itinerary:', generatedItinerary);
+
+      // Navigate to the generated itinerary details screen
+      navigation.navigate('GeneratedItineraryDetails', {
+        itinerary: generatedItinerary,
       });
-    }, 3000);
+    } catch (error) {
+      console.error('Failed to generate itinerary:', error);
+      Alert.alert(
+        'Generation Failed',
+        'Failed to generate your itinerary. Please try again.',
+        [{text: 'OK'}],
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isLoading) {
@@ -224,25 +261,27 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
         {/* Destination */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Destination</Text>
-          <View style={styles.inputContainer}>
+          <View
+            style={[
+              styles.inputContainer,
+              destinationError ? styles.inputContainerError : null,
+            ]}>
             <TextInput
               style={styles.textInput}
               placeholder="Where do you want to go?"
               placeholderTextColor="#666"
               value={destination}
-              onChangeText={setDestination}
+              onChangeText={text => {
+                setDestination(text);
+                if (destinationError) {
+                  setDestinationError('');
+                }
+              }}
             />
           </View>
-          <View style={styles.locationOptions}>
-            <TouchableOpacity style={styles.locationOption}>
-              <Text style={styles.locationIcon}>📍</Text>
-              <Text style={styles.locationText}>Use current location</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.locationOption}>
-              <Text style={styles.locationIcon}>🗺️</Text>
-              <Text style={styles.locationText}>Browse map</Text>
-            </TouchableOpacity>
-          </View>
+          {destinationError ? (
+            <Text style={styles.errorText}>{destinationError}</Text>
+          ) : null}
         </View>
 
         {/* Dates */}
@@ -250,16 +289,49 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
           <Text style={styles.sectionTitle}>Dates</Text>
           <View style={styles.dateContainer}>
             <TouchableOpacity
-              style={styles.dateInput}
-              onPress={() => openDatePicker('start')}>
-              <Text style={styles.dateText}>{startDate}</Text>
+              style={[
+                styles.dateInput,
+                datesError ? styles.dateInputError : null,
+              ]}
+              onPress={() => {
+                openDatePicker('start');
+                if (datesError) {
+                  setDatesError('');
+                }
+              }}>
+              <Text
+                style={[
+                  styles.dateText,
+                  startDate === 'Start date'
+                    ? styles.dateTextPlaceholder
+                    : null,
+                ]}>
+                {startDate}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.dateInput}
-              onPress={() => openDatePicker('end')}>
-              <Text style={styles.dateText}>{endDate}</Text>
+              style={[
+                styles.dateInput,
+                datesError ? styles.dateInputError : null,
+              ]}
+              onPress={() => {
+                openDatePicker('end');
+                if (datesError) {
+                  setDatesError('');
+                }
+              }}>
+              <Text
+                style={[
+                  styles.dateText,
+                  endDate === 'End date' ? styles.dateTextPlaceholder : null,
+                ]}>
+                {endDate}
+              </Text>
             </TouchableOpacity>
           </View>
+          {datesError ? (
+            <Text style={styles.errorText}>{datesError}</Text>
+          ) : null}
           <View style={styles.flexibleContainer}>
             <Text style={styles.flexibleText}>Flexible dates</Text>
             <TouchableOpacity
@@ -315,45 +387,53 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Budget Range</Text>
           <Text style={styles.budgetValue}>
-            ${budgetMin} - ${budgetMax}
+            ${formatCurrency(budgetMin)} - ${formatCurrency(budgetMax)}
           </Text>
-          <View style={styles.sliderContainer}>
-            <View style={styles.sliderTrack}>
-              {/* Fill between min and max */}
-              <View
-                style={[
-                  styles.sliderFill,
-                  {
-                    left: `${((budgetMin - 500) / 1500) * 100}%`,
-                    width: `${((budgetMax - budgetMin) / 1500) * 100}%`,
-                  },
-                ]}
-              />
-              {/* Min thumb */}
-              <View
-                style={[
-                  styles.sliderThumb,
-                  {left: `${((budgetMin - 500) / 1500) * 100}%`},
-                ]}
-                {...minThumbPanResponder.panHandlers}>
-                <View style={styles.thumbInner} />
+
+          <View style={styles.budgetInputContainer}>
+            <View style={styles.budgetInputWrapper}>
+              <Text style={styles.budgetInputLabel}>Minimum Budget</Text>
+              <View style={styles.budgetInputField}>
+                <Text style={styles.currencySymbol}>$</Text>
+                <TextInput
+                  style={[
+                    styles.budgetInput,
+                    budgetMinError ? styles.budgetInputError : null,
+                  ]}
+                  value={budgetMin > 0 ? budgetMin.toString() : ''}
+                  onChangeText={handleBudgetMinChange}
+                  placeholder="500"
+                  placeholderTextColor="#666666"
+                  keyboardType="numeric"
+                  maxLength={6}
+                />
               </View>
-              {/* Max thumb */}
-              <View
-                style={[
-                  styles.sliderThumb,
-                  {left: `${((budgetMax - 500) / 1500) * 100}%`},
-                ]}
-                {...maxThumbPanResponder.panHandlers}>
-                <View style={styles.thumbInner} />
-              </View>
+              {budgetMinError ? (
+                <Text style={styles.budgetErrorText}>{budgetMinError}</Text>
+              ) : null}
             </View>
-            {/* Track click areas */}
-            <TouchableOpacity
-              style={styles.sliderClickArea}
-              onPress={handleSliderTrackPress}
-              activeOpacity={1}
-            />
+
+            <View style={styles.budgetInputWrapper}>
+              <Text style={styles.budgetInputLabel}>Maximum Budget</Text>
+              <View style={styles.budgetInputField}>
+                <Text style={styles.currencySymbol}>$</Text>
+                <TextInput
+                  style={[
+                    styles.budgetInput,
+                    budgetMaxError ? styles.budgetInputError : null,
+                  ]}
+                  value={budgetMax > 0 ? budgetMax.toString() : ''}
+                  onChangeText={handleBudgetMaxChange}
+                  placeholder="2000"
+                  placeholderTextColor="#666666"
+                  keyboardType="numeric"
+                  maxLength={6}
+                />
+              </View>
+              {budgetMaxError ? (
+                <Text style={styles.budgetErrorText}>{budgetMaxError}</Text>
+              ) : null}
+            </View>
           </View>
         </View>
 
@@ -388,11 +468,22 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           style={styles.generateButton}
-          onPress={handleGenerateTrip}>
+          onPress={handleGenerateTrip}
+          disabled={isLoading}
+          activeOpacity={isLoading ? 1 : 0.7}>
           <LinearGradient
-            colors={['#FFD700', '#FFA500']}
+            colors={isLoading ? ['#999999', '#777777'] : ['#FFD700', '#FFA500']}
             style={styles.generateButtonGradient}>
-            <Text style={styles.generateButtonText}>✨ Generate Trip Plan</Text>
+            {isLoading ? (
+              <View style={styles.loadingButtonContent}>
+                <ActivityIndicator size="small" color="#000000" />
+                <Text style={styles.generateButtonText}>Generating...</Text>
+              </View>
+            ) : (
+              <Text style={styles.generateButtonText}>
+                ✨ Generate Trip Plan
+              </Text>
+            )}
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -540,29 +631,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#333333',
   },
+  inputContainerError: {
+    borderColor: '#FF4444',
+  },
   textInput: {
     color: '#FFFFFF',
     fontSize: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
-  locationOptions: {
-    flexDirection: 'row',
-    marginTop: 12,
-    gap: 20,
-  },
-  locationOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  locationIcon: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  locationText: {
-    color: '#FFD700',
+  errorText: {
+    color: '#FF4444',
     fontSize: 14,
-    fontWeight: '500',
+    marginTop: 8,
+    marginLeft: 4,
   },
   dateContainer: {
     flexDirection: 'row',
@@ -577,9 +659,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
+  dateInputError: {
+    borderColor: '#FF4444',
+  },
   dateText: {
     color: '#FFFFFF',
     fontSize: 16,
+  },
+  dateTextPlaceholder: {
+    color: '#666666',
   },
   flexibleContainer: {
     flexDirection: 'row',
@@ -747,6 +835,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  loadingButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   // Calendar Modal Styles
   modalOverlay: {
     flex: 1,
@@ -841,6 +934,54 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '500',
+  },
+  // Budget Input Styles
+  budgetInputContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  budgetInputWrapper: {
+    flex: 1,
+  },
+  budgetInputLabel: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  budgetInputField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#333333',
+    paddingHorizontal: 16,
+    paddingVertical: 2,
+  },
+  currencySymbol: {
+    color: '#FFD700',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  budgetInput: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '500',
+    paddingVertical: 12,
+  },
+  budgetInputError: {
+    borderColor: '#FF4444',
+    borderWidth: 2,
+  },
+  budgetErrorText: {
+    color: '#FF4444',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
   },
 });
 

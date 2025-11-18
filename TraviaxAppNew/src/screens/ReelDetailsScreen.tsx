@@ -8,11 +8,10 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
-  Dimensions,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-
-const {width, height} = Dimensions.get('window');
+import BackButton from '../components/BackButton';
+import {HeartIcon, CommentIcon, ShareIcon} from '../components/ReelIcons';
 
 interface ReelDetailsProps {
   route: {
@@ -119,15 +118,9 @@ const ReelDetailsScreen = ({route, navigation}: ReelDetailsProps) => {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Text style={styles.backIcon}>←</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} />
         <Text style={styles.headerTitle}>Reel Details</Text>
-        <TouchableOpacity style={styles.shareButton}>
-          <Text style={styles.shareIcon}>↗</Text>
-        </TouchableOpacity>
+        <View style={styles.placeholder} />
       </View>
 
       <ScrollView
@@ -154,24 +147,18 @@ const ReelDetailsScreen = ({route, navigation}: ReelDetailsProps) => {
         {/* Engagement Stats */}
         <View style={styles.statsContainer}>
           <TouchableOpacity style={styles.statItem} onPress={handleLike}>
-            <Text style={[styles.statIcon, isLiked && styles.likedIcon]}>
-              {isLiked ? '❤️' : '🤍'}
-            </Text>
-            <Text style={styles.statText}>{formatNumber(likes)} likes</Text>
+            <HeartIcon size={24} filled={isLiked} />
+            <Text style={styles.statText}>{formatNumber(likes)} </Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.statItem}>
-            <Text style={styles.statIcon}>💬</Text>
-            <Text style={styles.statText}>
-              {formatNumber(reel.comments)} comments
-            </Text>
+            <CommentIcon size={24} />
+            <Text style={styles.statText}>{formatNumber(reel.comments)}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.statItem}>
-            <Text style={styles.statIcon}>↗️</Text>
-            <Text style={styles.statText}>
-              {formatNumber(reel.shares)} shares
-            </Text>
+            <ShareIcon size={24} />
+            <Text style={styles.statText}>{formatNumber(reel.shares)}</Text>
           </TouchableOpacity>
         </View>
 
@@ -224,7 +211,7 @@ const ReelDetailsScreen = ({route, navigation}: ReelDetailsProps) => {
                 <View style={styles.amenitiesSection}>
                   <Text style={styles.amenitiesTitle}>Amenities</Text>
                   <View style={styles.amenitiesList}>
-                    {reelTypeDetails.details.amenities.map(
+                    {reelTypeDetails.details.amenities?.map(
                       (amenity: string, index: number) => (
                         <View key={index} style={styles.amenityItem}>
                           <Text style={styles.amenityText}>• {amenity}</Text>
@@ -295,7 +282,7 @@ const ReelDetailsScreen = ({route, navigation}: ReelDetailsProps) => {
                 <View style={styles.amenitiesSection}>
                   <Text style={styles.amenitiesTitle}>Highlights</Text>
                   <View style={styles.amenitiesList}>
-                    {reelTypeDetails.details.highlights.map(
+                    {reelTypeDetails.details.highlights?.map(
                       (highlight: string, index: number) => (
                         <View key={index} style={styles.amenityItem}>
                           <Text style={styles.amenityText}>• {highlight}</Text>
@@ -307,7 +294,7 @@ const ReelDetailsScreen = ({route, navigation}: ReelDetailsProps) => {
                 <View style={styles.amenitiesSection}>
                   <Text style={styles.amenitiesTitle}>Nearby Attractions</Text>
                   <View style={styles.amenitiesList}>
-                    {reelTypeDetails.details.nearbyAttractions.map(
+                    {reelTypeDetails.details.nearbyAttractions?.map(
                       (attraction: string, index: number) => (
                         <View key={index} style={styles.amenityItem}>
                           <Text style={styles.amenityText}>• {attraction}</Text>
@@ -360,35 +347,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#333333',
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#1A1A1A',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  backIcon: {
-    color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
   headerTitle: {
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
   },
-  shareButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#1A1A1A',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  shareIcon: {
-    color: '#FFFFFF',
-    fontSize: 18,
+  placeholder: {
+    width: 36,
   },
   scrollView: {
     flex: 1,
@@ -449,13 +414,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-  },
-  statIcon: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  likedIcon: {
-    transform: [{scale: 1.2}],
+    gap: 8,
   },
   statText: {
     color: '#FFFFFF',

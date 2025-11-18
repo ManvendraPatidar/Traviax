@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {apiService, UserProfile, WallPost} from '../services/api';
+import {HeartIcon, CommentIcon, ShareIcon} from '../components/ReelIcons';
 
 const ProfileScreen = () => {
   const [activeTab, setActiveTab] = useState('wall');
@@ -210,15 +211,16 @@ const ProfileScreen = () => {
 
                     <View style={styles.postActions}>
                       <TouchableOpacity style={styles.actionButton}>
-                        <Text style={styles.actionText}>♥ {post.likes}</Text>
+                        <HeartIcon size={20} filled={false} />
+                        <Text style={styles.actionText}>{post.likes}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={styles.actionButton}>
-                        <Text style={styles.actionText}>
-                          💬 {post.comments}
-                        </Text>
+                        <CommentIcon size={20} />
+                        <Text style={styles.actionText}>{post.comments}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={styles.actionButton}>
-                        <Text style={styles.actionText}>↗ Share</Text>
+                        <ShareIcon size={20} />
+                        <Text style={styles.actionText}>Share</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -471,10 +473,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 12,
+    gap: 8,
   },
   actionText: {
-    color: '#888888',
+    color: '#CCCCCC',
     fontSize: 14,
+    fontWeight: '500',
   },
   loadingContainer: {
     flex: 1,

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://192.168.100.206:8000/api/v1';
+const API_BASE_URL = 'http://192.168.100.206:8002/api/v1';
 
 export interface UserProfile {
   id: string;
@@ -171,6 +171,41 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify({userMessage, history}),
     });
+  }
+
+  async generateItinerary(tripData: {
+    destination: string;
+    startDate: string;
+    endDate: string;
+    budgetMin?: number;
+    budgetMax?: number;
+    numberOfTravelers?: number;
+    travelType?: string;
+    selectedPreferences?: string[];
+    flexibleDates?: boolean;
+  }): Promise<any> {
+    try {
+      const response = await fetch(
+        'http://192.168.100.206:8002/api/generateItinerary',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(tripData),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const itinerary = await response.json();
+      return itinerary;
+    } catch (error) {
+      console.error('Failed to generate itinerary:', error);
+      throw error;
+    }
   }
 }
 

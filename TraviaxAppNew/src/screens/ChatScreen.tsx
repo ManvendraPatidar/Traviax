@@ -89,19 +89,19 @@ const ChatScreen: React.FC<ChatScreenProps> = ({navigation}) => {
     }
   };
 
-  const resetConversation = () => {
-    if (isLoading) {
-      return;
-    }
-    setMessages([
-      {
-        id: '1',
-        text: "Hello! I'm your AI Travel Assistant. How can I help you with your travel plans today?",
-        isUser: false,
-        timestamp: new Date(),
-      },
-    ]);
-  };
+  // const resetConversation = () => {
+  //   if (isLoading) {
+  //     return;
+  //   }
+  //   setMessages([
+  //     {
+  //       id: '1',
+  //       text: "Hello! I'm your AI Travel Assistant. How can I help you with your travel plans today?",
+  //       isUser: false,
+  //       timestamp: new Date(),
+  //     },
+  //   ]);
+  // };
 
   const renderMessage = (message: Message) => {
     return (
@@ -175,9 +175,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({navigation}) => {
 
       {/* Input Area */}
       <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.attachButton}>
-          <Text style={styles.attachIcon}>📎</Text>
-        </TouchableOpacity>
         <TextInput
           style={styles.textInput}
           placeholder="Ask me anything..."
@@ -186,9 +183,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({navigation}) => {
           onChangeText={setInputText}
           multiline
         />
-        <TouchableOpacity style={styles.voiceButton}>
-          <Text style={styles.voiceIcon}>🎤</Text>
-        </TouchableOpacity>
         <TouchableOpacity
           style={styles.sendButton}
           onPress={sendMessage}
@@ -331,18 +325,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#1A1A1A',
-    gap: 8,
-  },
-  attachButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#333333',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  attachIcon: {
-    fontSize: 16,
+    gap: 12,
   },
   textInput: {
     flex: 1,
@@ -353,17 +336,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     maxHeight: 100,
-  },
-  voiceButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#333333',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  voiceIcon: {
-    fontSize: 16,
   },
   sendButton: {
     width: 36,
