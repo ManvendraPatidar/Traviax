@@ -169,6 +169,7 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     fetchAllData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const performSearch = useCallback(async (query: string) => {
@@ -400,7 +401,38 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({navigation}) => {
   );
 
   const renderActivityCard = ({item}: {item: any}) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => {
+        navigation?.navigate('ActivityDetails', {
+          activity: {
+            id: item.id,
+            name: item.name || item.title,
+            title: item.title || item.name,
+            location: item.location || 'Location',
+            rating: item.rating || 4.5,
+            reviews: item.reviews || Math.floor(Math.random() * 1000) + 100,
+            price: item.price,
+            image: item.image,
+            images: item.images || item.photos || [item.image],
+            description:
+              item.description ||
+              `${item.name || item.title} - An amazing activity experience.`,
+            duration: item.duration || '2-3 hours',
+            timings: item.timings || {
+              daily: '9:00 AM - 6:00 PM',
+              bestTime: '10:00 AM - 2:00 PM',
+            },
+            highlights: item.highlights || [
+              'Professional guide included',
+              'All equipment provided',
+              'Small group experience',
+              'Safety briefing included',
+            ],
+            photos: item.photos || item.images || [item.image],
+          },
+        });
+      }}>
       <Image source={{uri: item.image}} style={styles.cardImage} />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={1}>
@@ -654,9 +686,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#1A1A1A',
-    borderRadius: 25,
+    borderRadius: 12,
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    // paddingVertical: 15,
     borderWidth: 1,
     borderColor: '#333333',
     shadowColor: '#000',

@@ -12,6 +12,12 @@ import {
   StatusBar,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import {
+  HeartIcon,
+  CommentIcon,
+  ShareIcon,
+  LocationIcon,
+} from '../components/ReelIcons';
 
 const {width, height} = Dimensions.get('screen');
 const DEFAULT_REEL_IMAGE =
@@ -195,9 +201,11 @@ const ReelsScreen = ({navigation}: ReelsScreenProps) => {
   const handleOpenReelDetails = useCallback(
     (reel: any) => {
       if (!navigation?.navigate) {
+        console.warn('Navigation object not available');
         return;
       }
       const payload = buildReelDetailsPayload(reel);
+      console.log('Navigating to ReelDetails with payload:', payload);
       navigation.navigate('ReelDetails', {reel: payload});
     },
     [navigation],
@@ -237,24 +245,18 @@ const ReelsScreen = ({navigation}: ReelsScreenProps) => {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => handleLike(item.id)}>
-            <Text style={[styles.actionIcon, item.isLiked && styles.likedIcon]}>
-              {item.isLiked ? '❤️' : '🤍'}
-            </Text>
+            <HeartIcon size={32} filled={item.isLiked} />
             <Text style={styles.actionText}>{formatNumber(item.likes)}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>💬</Text>
+            <CommentIcon size={32} />
             <Text style={styles.actionText}>{formatNumber(item.comments)}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>↗️</Text>
+            <ShareIcon size={32} />
             <Text style={styles.actionText}>{formatNumber(item.shares)}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>⋯</Text>
           </TouchableOpacity>
         </View>
 
@@ -272,22 +274,15 @@ const ReelsScreen = ({navigation}: ReelsScreenProps) => {
           {/* Title and description */}
           <TouchableOpacity
             style={styles.textContent}
-            onPress={() => handleOpenReelDetails(item)}>
-            <Text
-              style={styles.title}
-              onPress={() => handleOpenReelDetails(item)}>
-              {item.title}
-            </Text>
-            <Text
-              style={styles.description}
-              onPress={() => handleOpenReelDetails(item)}>
-              {item.description}
-            </Text>
+            onPress={() => handleOpenReelDetails(item)}
+            activeOpacity={0.7}>
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.description}>{item.description}</Text>
           </TouchableOpacity>
 
           {/* Check-in button */}
           <TouchableOpacity style={styles.checkInButton}>
-            <Text style={styles.checkInIcon}>📍</Text>
+            <LocationIcon size={18} color="#000000" />
             <Text style={styles.checkInText}>Check-In</Text>
           </TouchableOpacity>
         </View>
@@ -400,20 +395,13 @@ const styles = StyleSheet.create({
   rightActions: {
     position: 'absolute',
     right: 15,
-    bottom: 120,
+    bottom: 320,
     zIndex: 2,
     gap: 20,
   },
   actionButton: {
     alignItems: 'center',
-    gap: 5,
-  },
-  actionIcon: {
-    fontSize: 28,
-    textAlign: 'center',
-  },
-  likedIcon: {
-    transform: [{scale: 1.2}],
+    gap: 8,
   },
   actionText: {
     color: '#FFFFFF',
@@ -476,10 +464,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 25,
     alignSelf: 'flex-start',
-  },
-  checkInIcon: {
-    fontSize: 16,
-    marginRight: 8,
+    gap: 8,
   },
   checkInText: {
     color: '#000000',

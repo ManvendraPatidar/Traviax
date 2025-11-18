@@ -22,6 +22,14 @@ interface BookingScreenProps {
 
 interface SearchParams {
   type: 'flights' | 'hotels';
+  // Flight fields
+  departureAirport: string;
+  destinationAirport: string;
+  departureDate: string;
+  returnDate: string;
+  passengers: number;
+  flightClass: 'economy' | 'business' | 'first';
+  // Hotel fields (existing)
   origin: string;
   destination: string;
   checkIn: string;
@@ -33,13 +41,22 @@ interface SearchParams {
 const BookingScreen: React.FC<BookingScreenProps> = ({navigation}) => {
   const [activeTab, setActiveTab] = useState<'flights' | 'hotels'>('flights');
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [datePickerMode, setDatePickerMode] = useState<'checkIn' | 'checkOut'>(
-    'checkIn',
-  );
+  const [showClassDropdown, setShowClassDropdown] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState<
+    'departureDate' | 'returnDate' | 'checkIn' | 'checkOut'
+  >('departureDate');
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [searchParams, setSearchParams] = useState<SearchParams>({
     type: 'flights',
+    // Flight params
+    departureAirport: '',
+    destinationAirport: '',
+    departureDate: '',
+    returnDate: '',
+    passengers: 1,
+    flightClass: 'economy',
+    // Hotel params
     origin: '',
     destination: '',
     checkIn: '',
@@ -65,16 +82,14 @@ const BookingScreen: React.FC<BookingScreenProps> = ({navigation}) => {
       year: 'numeric',
     });
 
-  const openPicker = (mode: 'checkIn' | 'checkOut') => {
+  const openPicker = (
+    mode: 'departureDate' | 'returnDate' | 'checkIn' | 'checkOut',
+  ) => {
     setDatePickerMode(mode);
     setShowDatePicker(true);
-    if (mode === 'checkIn' && searchParams.checkIn) {
-      const existing = new Date(searchParams.checkIn);
-      if (!isNaN(existing.getTime())) {
-        setSelectedDate(existing);
-      }
-    } else if (mode === 'checkOut' && searchParams.checkOut) {
-      const existing = new Date(searchParams.checkOut);
+    const dateValue = searchParams[mode];
+    if (dateValue) {
+      const existing = new Date(dateValue);
       if (!isNaN(existing.getTime())) {
         setSelectedDate(existing);
       }
@@ -83,14 +98,16 @@ const BookingScreen: React.FC<BookingScreenProps> = ({navigation}) => {
 
   const handleDateSelect = (date: Date) => {
     const formatted = formatDate(date);
-    if (datePickerMode === 'checkIn') {
-      setSearchParams(prev => ({...prev, checkIn: formatted}));
-      if (searchParams.checkOut && new Date(searchParams.checkOut) < date) {
-        setSearchParams(prev => ({...prev, checkOut: ''}));
+    setSearchParams(prev => ({...prev, [datePickerMode]: formatted}));
+
+    // Clear return date if departure date is changed to a later date
+    if (datePickerMode === 'departureDate' && searchParams.returnDate) {
+      const returnDate = new Date(searchParams.returnDate);
+      if (date > returnDate) {
+        setSearchParams(prev => ({...prev, returnDate: ''}));
       }
-    } else {
-      setSearchParams(prev => ({...prev, checkOut: formatted}));
     }
+
     setShowDatePicker(false);
   };
 
@@ -176,120 +193,235 @@ const BookingScreen: React.FC<BookingScreenProps> = ({navigation}) => {
 
       {/* Search Fields */}
       <View style={styles.searchFields}>
-        <View style={styles.inputRow}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>
-              {activeTab === 'flights' ? 'From' : 'Destination'}
-            </Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder={
-                activeTab === 'flights' ? 'New York (NYC)' : 'Tokyo, Japan'
-              }
-              placeholderTextColor="#666666"
-              value={searchParams.origin}
-              onChangeText={text =>
-                setSearchParams({...searchParams, origin: text})
-              }
-            />
-          </View>
-          {activeTab === 'flights' && (
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>To</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Tokyo (NRT)"
-                placeholderTextColor="#666666"
-                value={searchParams.destination}
-                onChangeText={text =>
-                  setSearchParams({...searchParams, destination: text})
-                }
-              />
+        {activeTab === 'flights' ? (
+          <>
+            {/* Airport Fields */}
+            <View style={styles.inputRow}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Departure Airport</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="New York (JFK)"
+                  placeholderTextColor="#666666"
+                  value={searchParams.departureAirport}
+                  onChangeText={text =>
+                    setSearchParams({...searchParams, departureAirport: text})
+                  }
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Destination Airport</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Tokyo (NRT)"
+                  placeholderTextColor="#666666"
+                  value={searchParams.destinationAirport}
+                  onChangeText={text =>
+                    setSearchParams({...searchParams, destinationAirport: text})
+                  }
+                />
+              </View>
             </View>
-          )}
-        </View>
 
-        <View style={styles.inputRow}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Check-in</Text>
-            <TouchableOpacity
-              style={styles.dateCard}
-              onPress={() => openPicker('checkIn')}>
-              <Text style={styles.dateCardText}>
-                {searchParams.checkIn || 'Dec 15, 2024'}
-              </Text>
-              <Text style={styles.calendarHint}>📅</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Check-out</Text>
-            <TouchableOpacity
-              style={styles.dateCard}
-              onPress={() => openPicker('checkOut')}>
-              <Text style={styles.dateCardText}>
-                {searchParams.checkOut || 'Dec 22, 2024'}
-              </Text>
-              <Text style={styles.calendarHint}>📅</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.inputRow}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Travelers</Text>
-            <View style={styles.counterCard}>
-              <TouchableOpacity
-                style={styles.counterCircle}
-                onPress={() =>
-                  setSearchParams({
-                    ...searchParams,
-                    travelers: Math.max(1, searchParams.travelers - 1),
-                  })
-                }>
-                <Text style={styles.counterCircleText}>-</Text>
-              </TouchableOpacity>
-              <Text style={styles.counterValue}>{searchParams.travelers}</Text>
-              <TouchableOpacity
-                style={styles.counterCircle}
-                onPress={() =>
-                  setSearchParams({
-                    ...searchParams,
-                    travelers: searchParams.travelers + 1,
-                  })
-                }>
-                <Text style={styles.counterCircleText}>+</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          {activeTab === 'hotels' && (
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Rooms</Text>
-              <View style={styles.counterCard}>
+            {/* Flight Date and Class */}
+            <View style={styles.inputRow}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Departure Date</Text>
                 <TouchableOpacity
-                  style={styles.counterCircle}
-                  onPress={() =>
-                    setSearchParams({
-                      ...searchParams,
-                      rooms: Math.max(1, searchParams.rooms - 1),
-                    })
-                  }>
-                  <Text style={styles.counterCircleText}>-</Text>
+                  style={styles.dateCard}
+                  onPress={() => openPicker('departureDate')}>
+                  <Text style={styles.dateCardText}>
+                    {searchParams.departureDate || 'Select date'}
+                  </Text>
+                  <Text style={styles.calendarHint}>📅</Text>
                 </TouchableOpacity>
-                <Text style={styles.counterValue}>{searchParams.rooms}</Text>
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Class</Text>
                 <TouchableOpacity
-                  style={styles.counterCircle}
-                  onPress={() =>
-                    setSearchParams({
-                      ...searchParams,
-                      rooms: searchParams.rooms + 1,
-                    })
-                  }>
-                  <Text style={styles.counterCircleText}>+</Text>
+                  style={styles.dropdownButton}
+                  onPress={() => setShowClassDropdown(!showClassDropdown)}>
+                  <Text style={styles.dropdownButtonText}>
+                    {searchParams.flightClass === 'economy'
+                      ? 'Economy'
+                      : searchParams.flightClass === 'business'
+                      ? 'Business'
+                      : 'First Class'}
+                  </Text>
+                  <Text style={styles.dropdownArrow}>
+                    {showClassDropdown ? '▲' : '▼'}
+                  </Text>
+                </TouchableOpacity>
+
+                {showClassDropdown && (
+                  <View style={styles.dropdownMenu}>
+                    {(['economy', 'business', 'first'] as const).map(cls => (
+                      <TouchableOpacity
+                        key={cls}
+                        style={[
+                          styles.dropdownItem,
+                          searchParams.flightClass === cls &&
+                            styles.dropdownItemActive,
+                        ]}
+                        onPress={() => {
+                          setSearchParams({...searchParams, flightClass: cls});
+                          setShowClassDropdown(false);
+                        }}>
+                        <Text
+                          style={[
+                            styles.dropdownItemText,
+                            searchParams.flightClass === cls &&
+                              styles.dropdownItemTextActive,
+                          ]}>
+                          {cls === 'economy'
+                            ? 'Economy'
+                            : cls === 'business'
+                            ? 'Business'
+                            : 'First Class'}
+                        </Text>
+                        {searchParams.flightClass === cls && (
+                          <Text style={styles.checkmark}>✓</Text>
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* Passengers */}
+            <View style={styles.inputRow}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Passengers</Text>
+                <View style={styles.counterCard}>
+                  <TouchableOpacity
+                    style={styles.counterCircle}
+                    onPress={() =>
+                      setSearchParams({
+                        ...searchParams,
+                        passengers: Math.max(1, searchParams.passengers - 1),
+                      })
+                    }>
+                    <Text style={styles.counterCircleText}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.counterValue}>
+                    {searchParams.passengers}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.counterCircle}
+                    onPress={() =>
+                      setSearchParams({
+                        ...searchParams,
+                        passengers: searchParams.passengers + 1,
+                      })
+                    }>
+                    <Text style={styles.counterCircleText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </>
+        ) : (
+          <>
+            {/* Hotel Fields (existing) */}
+            <View style={styles.inputRow}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Destination</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Tokyo, Japan"
+                  placeholderTextColor="#666666"
+                  value={searchParams.destination}
+                  onChangeText={text =>
+                    setSearchParams({...searchParams, destination: text})
+                  }
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputRow}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Check-in</Text>
+                <TouchableOpacity
+                  style={styles.dateCard}
+                  onPress={() => openPicker('checkIn')}>
+                  <Text style={styles.dateCardText}>
+                    {searchParams.checkIn || 'Dec 15, 2024'}
+                  </Text>
+                  <Text style={styles.calendarHint}>📅</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Check-out</Text>
+                <TouchableOpacity
+                  style={styles.dateCard}
+                  onPress={() => openPicker('checkOut')}>
+                  <Text style={styles.dateCardText}>
+                    {searchParams.checkOut || 'Dec 22, 2024'}
+                  </Text>
+                  <Text style={styles.calendarHint}>📅</Text>
                 </TouchableOpacity>
               </View>
             </View>
-          )}
-        </View>
+
+            <View style={styles.inputRow}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Travelers</Text>
+                <View style={styles.counterCard}>
+                  <TouchableOpacity
+                    style={styles.counterCircle}
+                    onPress={() =>
+                      setSearchParams({
+                        ...searchParams,
+                        travelers: Math.max(1, searchParams.travelers - 1),
+                      })
+                    }>
+                    <Text style={styles.counterCircleText}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.counterValue}>
+                    {searchParams.travelers}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.counterCircle}
+                    onPress={() =>
+                      setSearchParams({
+                        ...searchParams,
+                        travelers: searchParams.travelers + 1,
+                      })
+                    }>
+                    <Text style={styles.counterCircleText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Rooms</Text>
+                <View style={styles.counterCard}>
+                  <TouchableOpacity
+                    style={styles.counterCircle}
+                    onPress={() =>
+                      setSearchParams({
+                        ...searchParams,
+                        rooms: Math.max(1, searchParams.rooms - 1),
+                      })
+                    }>
+                    <Text style={styles.counterCircleText}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.counterValue}>{searchParams.rooms}</Text>
+                  <TouchableOpacity
+                    style={styles.counterCircle}
+                    onPress={() =>
+                      setSearchParams({
+                        ...searchParams,
+                        rooms: searchParams.rooms + 1,
+                      })
+                    }>
+                    <Text style={styles.counterCircleText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </>
+        )}
       </View>
 
       {/* Search Button */}
@@ -686,6 +818,125 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 16,
     fontWeight: '600',
+  },
+  // Flight-specific styles
+  tripTypeContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 20,
+  },
+  tripTypeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  tripTypeActive: {
+    backgroundColor: '#FFD700',
+  },
+  tripTypeText: {
+    color: '#CCCCCC',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  tripTypeTextActive: {
+    color: '#000000',
+    fontWeight: 'bold',
+  },
+  // Dropdown styles
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#333333',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  dropdownButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  dropdownArrow: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#333333',
+    marginTop: 4,
+    zIndex: 1000,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333333',
+  },
+  dropdownItemActive: {
+    backgroundColor: '#2A2A2A',
+  },
+  dropdownItemText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  dropdownItemTextActive: {
+    color: '#FFD700',
+    fontWeight: 'bold',
+  },
+  checkmark: {
+    color: '#FFD700',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  // Legacy class selector styles (keeping for compatibility)
+  classSelector: {
+    flexDirection: 'column',
+    gap: 8,
+  },
+  classOption: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: '#1A1A1A',
+    borderWidth: 1,
+    borderColor: '#333333',
+    alignItems: 'center',
+  },
+  classOptionActive: {
+    backgroundColor: '#FFD700',
+    borderColor: '#FFD700',
+  },
+  classOptionText: {
+    color: '#CCCCCC',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  classOptionTextActive: {
+    color: '#000000',
+    fontWeight: 'bold',
   },
 });
 

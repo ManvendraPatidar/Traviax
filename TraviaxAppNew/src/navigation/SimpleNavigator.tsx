@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {View, StyleSheet} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, StyleSheet, BackHandler} from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import ExploreScreen from '../screens/ExploreScreen';
 import ReelsScreen from '../screens/ReelsScreen';
@@ -14,6 +14,8 @@ import ItineraryDetailsScreen from '../screens/ItineraryDetailsScreen';
 import BookingScreen from '../screens/BookingScreen';
 import SearchResultsScreen from '../screens/SearchResultsScreen';
 import PlaceDetailsScreen from '../screens/PlaceDetailsScreen';
+import ActivityDetailsScreen from '../screens/ActivityDetailsScreen';
+import GeneratedItineraryDetailsScreen from '../screens/GeneratedItineraryDetailsScreen';
 import SimpleTabBar from '../components/SimpleTabBar';
 
 type StackEntry = {
@@ -53,6 +55,27 @@ const SimpleNavigator = () => {
     navigateToHome,
   };
 
+  // Handle Android hardware back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        // If we're on a tab screen (stack length is 1), don't handle the back press
+        // This allows the app to close when on the main tab screen
+        if (stack.length <= 1) {
+          return false; // Let Android handle it (close app)
+        }
+
+        // Otherwise, navigate back in our custom stack
+        goBack();
+        return true; // We handled the back press
+      },
+    );
+
+    // Cleanup the listener when component unmounts
+    return () => backHandler.remove();
+  }, [stack.length]); // Re-run when stack length changes
+
   const renderTabScreen = () => {
     switch (activeTab) {
       case 'Home':
@@ -60,7 +83,7 @@ const SimpleNavigator = () => {
       case 'Explore':
         return <ExploreScreen navigation={navigation} />;
       case 'Reels':
-        return <ReelsScreen />;
+        return <ReelsScreen navigation={navigation} />;
       case 'Profile':
         return <ProfileScreen />;
       default:
@@ -129,6 +152,22 @@ const SimpleNavigator = () => {
     if (currentScreen === 'Itinerary') {
       return (
         <ItineraryScreen
+          route={{params: screenParams}}
+          navigation={navigation}
+        />
+      );
+    }
+    if (currentScreen === 'ActivityDetails') {
+      return (
+        <ActivityDetailsScreen
+          route={{params: screenParams}}
+          navigation={navigation}
+        />
+      );
+    }
+    if (currentScreen === 'GeneratedItineraryDetails') {
+      return (
+        <GeneratedItineraryDetailsScreen
           route={{params: screenParams}}
           navigation={navigation}
         />

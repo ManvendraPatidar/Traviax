@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   FlatList,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import BackButton from '../components/BackButton';
+import {apiService} from '../services/api';
 
 type SearchMode = 'flights' | 'hotels';
 
@@ -43,9 +46,18 @@ type HotelItem = {
   name: string;
   location: string;
   rating: number;
-  price: number;
-  date: string;
-  amenities: string[];
+  price: string;
+  image: string;
+  description: string;
+  reviews?: number;
+  visitingHours?: {
+    daily: string;
+    prime: string;
+  };
+  facts?: Array<{
+    icon: string;
+    text: string;
+  }>;
 };
 
 const SearchResultsScreen: React.FC<SearchResultsScreenProps> = ({
@@ -56,6 +68,8 @@ const SearchResultsScreen: React.FC<SearchResultsScreenProps> = ({
   const initialQuery = route?.params?.query ?? '';
 
   const [searchTerm, setSearchTerm] = useState(initialQuery);
+  const [hotels, setHotels] = useState<HotelItem[]>([]);
+  const [isLoadingHotels, setIsLoadingHotels] = useState(false);
 
   const flights = useMemo(
     (): FlightItem[] => [
@@ -102,38 +116,26 @@ const SearchResultsScreen: React.FC<SearchResultsScreenProps> = ({
     [],
   );
 
-  const hotels = useMemo(
-    (): HotelItem[] => [
-      {
-        id: 'HT001',
-        name: 'The Ritz-Carlton Tokyo',
-        location: 'Roppongi, Tokyo',
-        rating: 4.9,
-        price: 450,
-        date: 'Dec 15 - 22, 2024',
-        amenities: ['WiFi', 'Pool', 'Spa'],
-      },
-      {
-        id: 'HT002',
-        name: 'Park Hyatt Tokyo',
-        location: 'Shinjuku, Tokyo',
-        rating: 4.8,
-        price: 380,
-        date: 'Dec 15 - 22, 2024',
-        amenities: ['WiFi', 'Gym', 'Restaurant'],
-      },
-      {
-        id: 'HT003',
-        name: 'Aman Tokyo',
-        location: 'Otemachi, Tokyo',
-        rating: 5,
-        price: 520,
-        date: 'Dec 15 - 22, 2024',
-        amenities: ['WiFi', 'Spa', 'Pool'],
-      },
-    ],
-    [],
-  );
+  // Fetch hotels from backend
+  useEffect(() => {
+    const fetchHotels = async () => {
+      if (mode === 'hotels') {
+        setIsLoadingHotels(true);
+        try {
+          const hotelData = await apiService.getHotels();
+          setHotels(hotelData);
+        } catch (error) {
+          console.error('Failed to fetch hotels:', error);
+          // Fallback to empty array if API fails
+          setHotels([]);
+        } finally {
+          setIsLoadingHotels(false);
+        }
+      }
+    };
+
+    fetchHotels();
+  }, [mode]);
 
   const filteredFlights = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -161,48 +163,92 @@ const SearchResultsScreen: React.FC<SearchResultsScreenProps> = ({
   }, [hotels, searchTerm]);
 
   const renderFlight = ({item}: {item: FlightItem}) => (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} activeOpacity={0.8}>
       <View style={styles.cardHeader}>
-        <Text style={styles.primaryText}>{item.airline}</Text>
-        <Text style={styles.priceText}>${item.price}</Text>
+        <View style={styles.airlineSection}>
+          <Text style={styles.primaryText}>{item.airline}</Text>
+          <Text style={styles.dateText}>{item.date}</Text>
+        </View>
+        <View style={styles.priceSection}>
+          <Text style={styles.priceText}>${item.price}</Text>
+        </View>
       </View>
-      <Text style={styles.metaText}>{item.date}</Text>
-      <View style={styles.timeline}>
-        <View>
+
+      <View style={styles.flightDetails}>
+        <View style={styles.timeSection}>
           <Text style={styles.timelineTime}>{item.departure}</Text>
           <Text style={styles.timelineLabel}>{item.from}</Text>
         </View>
+
         <View style={styles.timelineConnector}>
           <Text style={styles.durationText}>{item.duration}</Text>
           <View style={styles.connectorLine} />
+          <View style={styles.connectorDots}>
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+          </View>
         </View>
-        <View>
+
+        <View style={styles.timeSection}>
           <Text style={styles.timelineTime}>{item.arrival}</Text>
           <Text style={styles.timelineLabel}>{item.to}</Text>
         </View>
       </View>
-      <View style={styles.metaRow}>
-        <Text style={styles.metaText}>Flight {item.flightNumber}</Text>
-        <Text style={styles.metaText}>
-          {item.stops === 0 ? 'Direct' : `${item.stops} stop`}
-        </Text>
+
+      <View style={styles.flightMeta}>
+        <View style={styles.flightInfo}>
+          <Text style={styles.flightNumber}>Flight {item.flightNumber}</Text>
+          <View style={styles.stopsBadge}>
+            <Text style={styles.stopsText}>
+              {item.stops === 0 ? 'Direct' : `${item.stops} stop`}
+            </Text>
+          </View>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderHotel = ({item}: {item: HotelItem}) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.primaryText}>{item.name}</Text>
-        <Text style={styles.priceText}>${item.price}/night</Text>
+    <TouchableOpacity style={styles.hotelCard} activeOpacity={0.8}>
+      <Image source={{uri: item.image}} style={styles.hotelImage} />
+
+      <View style={styles.hotelContent}>
+        <View style={styles.hotelHeader}>
+          <View style={styles.hotelTitleSection}>
+            <Text style={styles.hotelName} numberOfLines={1}>
+              {item.name}
+            </Text>
+            <Text style={styles.hotelLocation} numberOfLines={1}>
+              {item.location}
+            </Text>
+          </View>
+          <View style={styles.hotelPriceSection}>
+            <Text style={styles.hotelPrice}>{item.price}</Text>
+          </View>
+        </View>
+
+        <Text style={styles.hotelDescription} numberOfLines={2}>
+          {item.description}
+        </Text>
+
+        <View style={styles.hotelFooter}>
+          <View style={styles.ratingSection}>
+            <Text style={styles.ratingText}>⭐ {item.rating.toFixed(1)}</Text>
+            {item.reviews && (
+              <Text style={styles.reviewsText}>({item.reviews} reviews)</Text>
+            )}
+          </View>
+
+          {item.facts && item.facts.length > 0 && (
+            <View style={styles.amenitiesSection}>
+              <Text style={styles.amenityItem} numberOfLines={1}>
+                {item.facts[0].icon} {item.facts[0].text}
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
-      <Text style={styles.metaText}>{item.location}</Text>
-      <Text style={styles.metaText}>{item.date}</Text>
-      <View style={styles.metaRow}>
-        <Text style={styles.metaText}>⭐ {item.rating.toFixed(1)}</Text>
-        <Text style={styles.metaText}>{item.amenities.join(' • ')}</Text>
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -240,13 +286,30 @@ const SearchResultsScreen: React.FC<SearchResultsScreenProps> = ({
           showsVerticalScrollIndicator={false}
         />
       ) : (
-        <FlatList<HotelItem>
-          data={filteredHotels}
-          keyExtractor={item => item.id}
-          renderItem={renderHotel}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
+        <>
+          {isLoadingHotels ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#FFD700" />
+              <Text style={styles.loadingText}>Finding amazing hotels...</Text>
+            </View>
+          ) : (
+            <FlatList<HotelItem>
+              data={filteredHotels}
+              keyExtractor={item => item.id}
+              renderItem={renderHotel}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>No hotels found</Text>
+                  <Text style={styles.emptySubText}>
+                    Try adjusting your search terms
+                  </Text>
+                </View>
+              }
+            />
+          )}
+        </>
       )}
     </SafeAreaView>
   );
@@ -283,9 +346,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 14,
     borderWidth: 1,
     borderColor: '#222',
+    marginBottom: 8,
   },
   searchIcon: {
     marginRight: 12,
@@ -306,27 +369,126 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   card: {
-    backgroundColor: '#101010',
-    borderRadius: 18,
-    padding: 16,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 16,
+    padding: 20,
     borderWidth: 1,
-    borderColor: '#1f1f1f',
+    borderColor: '#333333',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  airlineSection: {
+    flex: 1,
   },
   primaryText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  dateText: {
+    color: '#888888',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  priceSection: {
+    alignItems: 'flex-end',
   },
   priceText: {
     color: '#FFD700',
+    fontSize: 24,
+    fontWeight: '800',
+  },
+  flightDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingVertical: 8,
+  },
+  timeSection: {
+    alignItems: 'center',
+    minWidth: 60,
+  },
+  timelineTime: {
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '700',
+    marginBottom: 4,
+  },
+  timelineLabel: {
+    color: '#CCCCCC',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  timelineConnector: {
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 16,
+    position: 'relative',
+  },
+  durationText: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  connectorLine: {
+    height: 3,
+    backgroundColor: '#FFD700',
+    width: '100%',
+    borderRadius: 2,
+  },
+  connectorDots: {
+    flexDirection: 'row',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{translateX: -8}, {translateY: -2}],
+  },
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#FFD700',
+    marginHorizontal: 2,
+  },
+  flightMeta: {
+    borderTopWidth: 1,
+    borderTopColor: '#333333',
+    paddingTop: 12,
+  },
+  flightInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  flightNumber: {
+    color: '#CCCCCC',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  stopsBadge: {
+    backgroundColor: '#333333',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  stopsText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
   metaText: {
     color: '#a1a1a1',
@@ -337,34 +499,123 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 10,
   },
-  timeline: {
+  // Hotel card styles
+  hotelCard: {
+    backgroundColor: '#1A1A1A',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#333333',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    overflow: 'hidden',
+  },
+  hotelImage: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+  },
+  hotelContent: {
+    padding: 16,
+  },
+  hotelHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 12,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
   },
-  timelineTime: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  timelineLabel: {
-    color: '#999',
-    fontSize: 12,
-  },
-  timelineConnector: {
+  hotelTitleSection: {
     flex: 1,
-    alignItems: 'center',
+    marginRight: 12,
   },
-  durationText: {
-    color: '#ffd700',
-    fontSize: 12,
+  hotelName: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
     marginBottom: 4,
   },
-  connectorLine: {
-    height: 2,
-    backgroundColor: '#ffd700',
-    width: '100%',
-    borderRadius: 1,
+  hotelLocation: {
+    color: '#CCCCCC',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  hotelPriceSection: {
+    alignItems: 'flex-end',
+  },
+  hotelPrice: {
+    color: '#FFD700',
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  hotelDescription: {
+    color: '#CCCCCC',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  hotelFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  ratingSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingText: {
+    color: '#FFD700',
+    fontSize: 14,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  reviewsText: {
+    color: '#888888',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  amenitiesSection: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  amenityItem: {
+    color: '#CCCCCC',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  // Loading and empty states
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  loadingText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '500',
+    marginTop: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  emptySubText: {
+    color: '#888888',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
 

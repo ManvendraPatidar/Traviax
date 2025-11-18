@@ -388,9 +388,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           <Text style={styles.greeting}>Good morning, Alex</Text>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.notificationIcon}>
-            <Text style={styles.iconText}>🔔</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.profileIcon}>
             <Text style={styles.iconText}>👤</Text>
           </TouchableOpacity>
@@ -494,7 +491,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           <Text style={styles.sectionTitle}>For You</Text>
           <View style={styles.sectionTabs}>
             <Text style={[styles.tab, styles.activeTab]}>Trending Reels</Text>
-            <Text style={styles.tab}>Recommended</Text>
           </View>
         </View>
         <ScrollView
@@ -502,10 +498,42 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.reelsScroll}>
           {reelLoading ? (
-            <View style={styles.reelPlaceholderCard}>
-              <ActivityIndicator color="#FFD700" />
-              <Text style={styles.reelPlaceholderText}>Loading reels...</Text>
-            </View>
+            <>
+              {/* Multiple skeleton loading cards */}
+              {[1, 2, 3].map(index => (
+                <View key={index} style={styles.reelSkeletonCard}>
+                  <View style={styles.skeletonImageContainer}>
+                    <LinearGradient
+                      colors={['#2A2A2A', '#1A1A1A', '#2A2A2A']}
+                      start={{x: 0, y: 0}}
+                      end={{x: 1, y: 0}}
+                      style={styles.skeletonGradient}
+                    />
+                    <View style={styles.skeletonOverlay}>
+                      <View style={styles.skeletonTopSection}>
+                        <View style={styles.skeletonTag} />
+                        <View style={styles.skeletonDuration} />
+                      </View>
+                      <View style={styles.skeletonBottomSection}>
+                        <View style={styles.skeletonAvatar} />
+                        <View style={styles.skeletonTextContainer}>
+                          <View style={styles.skeletonTitle} />
+                          <View style={styles.skeletonLocation} />
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                  {index === 2 && (
+                    <View style={styles.loadingIndicatorContainer}>
+                      <ActivityIndicator size="small" color="#FFD700" />
+                      <Text style={styles.loadingText}>
+                        Loading amazing reels...
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              ))}
+            </>
           ) : reelError ? (
             <TouchableOpacity
               style={styles.reelPlaceholderCard}
@@ -878,6 +906,94 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     textAlign: 'center',
     marginTop: 12,
+  },
+  // Skeleton loading styles
+  reelSkeletonCard: {
+    width: 180,
+    height: 260,
+    borderRadius: 18,
+    marginRight: 16,
+    overflow: 'hidden',
+    backgroundColor: '#1A1A1A',
+    position: 'relative',
+  },
+  skeletonImageContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  skeletonGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  skeletonOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 16,
+    justifyContent: 'space-between',
+  },
+  skeletonTopSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  skeletonTag: {
+    width: 60,
+    height: 20,
+    backgroundColor: '#333333',
+    borderRadius: 10,
+  },
+  skeletonDuration: {
+    width: 40,
+    height: 16,
+    backgroundColor: '#333333',
+    borderRadius: 8,
+  },
+  skeletonBottomSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  skeletonAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#333333',
+    marginRight: 12,
+  },
+  skeletonTextContainer: {
+    flex: 1,
+  },
+  skeletonTitle: {
+    width: '80%',
+    height: 14,
+    backgroundColor: '#333333',
+    borderRadius: 7,
+    marginBottom: 6,
+  },
+  skeletonLocation: {
+    width: '60%',
+    height: 12,
+    backgroundColor: '#333333',
+    borderRadius: 6,
+  },
+  loadingIndicatorContainer: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    right: 16,
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 8,
+    textAlign: 'center',
   },
   reelErrorText: {
     color: '#FFD700',

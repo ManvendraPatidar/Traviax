@@ -6,7 +6,7 @@ import uvicorn
 
 from app.core.config import settings
 from app.routers import reels, users, places, checkins, bookings, concierge, events, auth, explore, chat
-from app.routes import itineraries
+from app.routes import itineraries, generate_itinerary
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -47,6 +47,7 @@ app.include_router(events.router, prefix="/api/v1/events", tags=["Events"])
 app.include_router(explore.router, prefix="/api/v1", tags=["Explore"])
 app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
 app.include_router(itineraries.router, tags=["Itineraries"])
+app.include_router(generate_itinerary.router, tags=["AI Itinerary Generation"])
 
 @app.get("/")
 async def root():
