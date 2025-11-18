@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     
     # External APIs (Optional)
     OPENAI_API_KEY: Optional[str] = None
+    OPENAI_MODEL: Optional[str] = None
     AMADEUS_API_KEY: Optional[str] = None
     AMADEUS_API_SECRET: Optional[str] = None
     GOOGLE_MAPS_API_KEY: Optional[str] = None

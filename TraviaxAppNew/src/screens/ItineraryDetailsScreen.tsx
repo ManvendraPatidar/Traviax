@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   Image,
 } from 'react-native';
+import BackButton from '../components/BackButton';
 import LinearGradient from 'react-native-linear-gradient';
 import {apiService} from '../services/api';
 
@@ -179,15 +180,11 @@ const ItineraryDetailsScreen: React.FC<ItineraryDetailsScreenProps> = ({
             style={styles.headerGradient}>
             {/* Navigation */}
             <View style={styles.headerNav}>
-              <TouchableOpacity
+              <BackButton
                 onPress={navigation.goBack}
-                style={styles.backButton}>
-                <Text style={styles.backIcon}>←</Text>
-              </TouchableOpacity>
+                style={styles.backButton}
+              />
               <Text style={styles.headerLocation}>{headerLocation}</Text>
-              <TouchableOpacity style={styles.shareButton}>
-                <Text style={styles.shareIcon}>⤴</Text>
-              </TouchableOpacity>
             </View>
 
             {/* Trip Info */}
@@ -239,7 +236,7 @@ const styles = StyleSheet.create({
   },
   headerNav: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 20,
     alignItems: 'center',
   },
   backButton: {

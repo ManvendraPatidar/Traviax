@@ -14,6 +14,10 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 
 const {width, height} = Dimensions.get('screen');
+const DEFAULT_REEL_IMAGE =
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600&h=900&fit=crop';
+const DEFAULT_REEL_AVATAR =
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces';
 
 // Sample reels data with travel content
 const initialReelsData = [
@@ -116,6 +120,26 @@ interface ReelsScreenProps {
   };
 }
 
+const buildReelDetailsPayload = (reel: any) => {
+  const user = reel?.user ?? {
+    username: reel?.creator?.username ?? 'traveler',
+    avatar: reel?.creator?.avatar ?? DEFAULT_REEL_AVATAR,
+  };
+
+  return {
+    id: reel?.id,
+    title: reel?.title ?? 'Travel Story',
+    description: reel?.description ?? reel?.location ?? 'Explore the world',
+    image: reel?.image ?? reel?.thumbnail ?? DEFAULT_REEL_IMAGE,
+    location: reel?.location ?? 'Worldwide',
+    likes: reel?.likes ?? 0,
+    comments: reel?.comments ?? 0,
+    shares: reel?.shares ?? 0,
+    isLiked: Boolean(reel?.isLiked),
+    user,
+  };
+};
+
 const ReelsScreen = ({navigation}: ReelsScreenProps) => {
   const [reelsData, setReelsData] = useState(initialReelsData);
   const [_currentIndex, setCurrentIndex] = useState(0);
@@ -167,6 +191,17 @@ const ReelsScreen = ({navigation}: ReelsScreenProps) => {
     }
     return num.toString();
   };
+
+  const handleOpenReelDetails = useCallback(
+    (reel: any) => {
+      if (!navigation?.navigate) {
+        return;
+      }
+      const payload = buildReelDetailsPayload(reel);
+      navigation.navigate('ReelDetails', {reel: payload});
+    },
+    [navigation],
+  );
 
   const renderReel = ({item}: {item: any; index: number}) => (
     <View style={styles.reelContainer}>
@@ -237,9 +272,17 @@ const ReelsScreen = ({navigation}: ReelsScreenProps) => {
           {/* Title and description */}
           <TouchableOpacity
             style={styles.textContent}
-            onPress={() => navigation?.navigate('ReelDetails', {reel: item})}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.description}>{item.description}</Text>
+            onPress={() => handleOpenReelDetails(item)}>
+            <Text
+              style={styles.title}
+              onPress={() => handleOpenReelDetails(item)}>
+              {item.title}
+            </Text>
+            <Text
+              style={styles.description}
+              onPress={() => handleOpenReelDetails(item)}>
+              {item.description}
+            </Text>
           </TouchableOpacity>
 
           {/* Check-in button */}

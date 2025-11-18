@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 
 from app.core.config import settings
-from app.routers import reels, users, places, checkins, bookings, concierge, events, auth, explore
+from app.routers import reels, users, places, checkins, bookings, concierge, events, auth, explore, chat
 from app.routes import itineraries
 
 @asynccontextmanager
@@ -45,6 +45,7 @@ app.include_router(bookings.router, prefix="/api/v1/bookings", tags=["Bookings"]
 app.include_router(concierge.router, prefix="/api/v1/concierge", tags=["AI Concierge"])
 app.include_router(events.router, prefix="/api/v1/events", tags=["Events"])
 app.include_router(explore.router, prefix="/api/v1", tags=["Explore"])
+app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
 app.include_router(itineraries.router, tags=["Itineraries"])
 
 @app.get("/")

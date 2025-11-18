@@ -33,6 +33,12 @@ export interface UserProfile {
   events_count?: number;
 }
 
+interface ReelFeedResponse {
+  reels: any[];
+  cursor?: string | null;
+  has_more?: boolean;
+}
+
 export interface APIResponse<T> {
   success: boolean;
   data: T;
@@ -120,6 +126,17 @@ class ApiService {
     return this.makeRequest<any[]>('/trending-places');
   }
 
+  async getReels(
+    limit: number = 8,
+    cursor?: string,
+  ): Promise<ReelFeedResponse> {
+    const params = new URLSearchParams({limit: String(limit)});
+    if (cursor) {
+      params.append('cursor', cursor);
+    }
+    return this.makeRequest<ReelFeedResponse>(`/reels?${params.toString()}`);
+  }
+
   async getHomeItineraries(limit: number = 6): Promise<any[]> {
     const params = new URLSearchParams({limit: String(limit)});
     return this.makeRequest<any[]>(`/itineraries?${params.toString()}`);
@@ -144,6 +161,16 @@ class ApiService {
   async searchExplore(query: string): Promise<any[]> {
     const searchParams = new URLSearchParams({q: query});
     return this.makeRequest<any[]>(`/search?${searchParams.toString()}`);
+  }
+
+  async chat(
+    userMessage: string,
+    history?: Array<{role: 'user' | 'assistant' | 'system'; content: string}>,
+  ): Promise<{reply: string}> {
+    return this.makeRequest<{reply: string}>(`/chat`, {
+      method: 'POST',
+      body: JSON.stringify({userMessage, history}),
+    });
   }
 }
 

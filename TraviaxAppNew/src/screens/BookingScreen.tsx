@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   SafeAreaView,
-  Image,
+  ImageBackground,
+  Modal,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import BackButton from '../components/BackButton';
 
 interface BookingScreenProps {
   navigation: {
@@ -28,32 +30,13 @@ interface SearchParams {
   rooms: number;
 }
 
-interface FlightResult {
-  id: string;
-  airline: string;
-  flightNumber: string;
-  departure: string;
-  arrival: string;
-  duration: string;
-  price: number;
-  stops: number;
-}
-
-interface HotelResult {
-  id: string;
-  name: string;
-  rating: number;
-  image: string;
-  location: string;
-  price: number;
-  amenities: string[];
-}
-
 const BookingScreen: React.FC<BookingScreenProps> = ({navigation}) => {
   const [activeTab, setActiveTab] = useState<'flights' | 'hotels'>('flights');
-  const [showResults, setShowResults] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState<'checkIn' | 'checkOut'>(
+    'checkIn',
+  );
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [searchParams, setSearchParams] = useState<SearchParams>({
     type: 'flights',
@@ -65,100 +48,89 @@ const BookingScreen: React.FC<BookingScreenProps> = ({navigation}) => {
     rooms: 1,
   });
 
-  // Sample flight data (Amadeus-style)
-  const sampleFlights: FlightResult[] = [
-    {
-      id: 'FL001',
-      airline: 'Emirates',
-      flightNumber: 'EK 248',
-      departure: '14:30',
-      arrival: '22:45',
-      duration: '8h 15m',
-      price: 1250,
-      stops: 0,
-    },
-    {
-      id: 'FL002',
-      airline: 'Qatar Airways',
-      flightNumber: 'QR 362',
-      departure: '09:15',
-      arrival: '18:30',
-      duration: '9h 15m',
-      price: 1180,
-      stops: 1,
-    },
-    {
-      id: 'FL003',
-      airline: 'Lufthansa',
-      flightNumber: 'LH 714',
-      departure: '16:45',
-      arrival: '06:20+1',
-      duration: '13h 35m',
-      price: 980,
-      stops: 1,
-    },
-  ];
-
-  // Sample hotel data
-  const sampleHotels: HotelResult[] = [
-    {
-      id: 'HT001',
-      name: 'The Ritz-Carlton Tokyo',
-      rating: 5,
-      image:
-        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
-      location: 'Roppongi, Tokyo',
-      price: 450,
-      amenities: ['WiFi', 'Pool', 'Spa', 'Restaurant'],
-    },
-    {
-      id: 'HT002',
-      name: 'Park Hyatt Tokyo',
-      rating: 5,
-      image:
-        'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop',
-      location: 'Shinjuku, Tokyo',
-      price: 380,
-      amenities: ['WiFi', 'Gym', 'Restaurant', 'Bar'],
-    },
-    {
-      id: 'HT003',
-      name: 'Aman Tokyo',
-      rating: 5,
-      image:
-        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
-      location: 'Otemachi, Tokyo',
-      price: 520,
-      amenities: ['WiFi', 'Spa', 'Pool', 'Restaurant'],
-    },
-  ];
-
   const handleSearch = () => {
-    setShowResults(true);
-    setShowConfirmation(false);
+    navigation.navigate('SearchResults', {
+      mode: activeTab,
+      query:
+        activeTab === 'flights'
+          ? searchParams.destination || searchParams.origin
+          : searchParams.destination,
+    });
   };
 
-  const handleBooking = (item: any) => {
-    setSelectedBooking(item);
-    setShowConfirmation(true);
-    setShowResults(false);
+  const formatDate = (date: Date) =>
+    date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+  const openPicker = (mode: 'checkIn' | 'checkOut') => {
+    setDatePickerMode(mode);
+    setShowDatePicker(true);
+    if (mode === 'checkIn' && searchParams.checkIn) {
+      const existing = new Date(searchParams.checkIn);
+      if (!isNaN(existing.getTime())) {
+        setSelectedDate(existing);
+      }
+    } else if (mode === 'checkOut' && searchParams.checkOut) {
+      const existing = new Date(searchParams.checkOut);
+      if (!isNaN(existing.getTime())) {
+        setSelectedDate(existing);
+      }
+    }
+  };
+
+  const handleDateSelect = (date: Date) => {
+    const formatted = formatDate(date);
+    if (datePickerMode === 'checkIn') {
+      setSearchParams(prev => ({...prev, checkIn: formatted}));
+      if (searchParams.checkOut && new Date(searchParams.checkOut) < date) {
+        setSearchParams(prev => ({...prev, checkOut: ''}));
+      }
+    } else {
+      setSearchParams(prev => ({...prev, checkOut: formatted}));
+    }
+    setShowDatePicker(false);
+  };
+
+  const calendarDays = useMemo(() => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const calendarStartDate = new Date(firstDay);
+    calendarStartDate.setDate(calendarStartDate.getDate() - firstDay.getDay());
+    const days = [];
+    for (let i = 0; i < 42; i++) {
+      const date = new Date(calendarStartDate);
+      date.setDate(calendarStartDate.getDate() + i);
+      days.push(date);
+    }
+    return days;
+  }, [selectedDate]);
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    const newDate = new Date(selectedDate);
+    newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+    setSelectedDate(newDate);
   };
 
   const renderSearchForm = () => (
     <View style={styles.searchForm}>
-      {/* Hero Section */}
-      <LinearGradient
-        colors={['#FFD700', '#FFA500', '#FF8C00']}
-        style={styles.heroSection}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 1}}>
-        <Text style={styles.heroTitle}>Find Your Perfect Trip</Text>
-        <Text style={styles.heroSubtitle}>
-          {activeTab === 'flights'
-            ? 'Search thousands of flights'
-            : 'Discover amazing hotels'}
-        </Text>
-      </LinearGradient>
+      <ImageBackground
+        source={{
+          uri: 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=800',
+        }}
+        style={styles.heroImage}
+        imageStyle={styles.heroImageStyle}>
+        <View style={styles.heroOverlay}>
+          <Text style={styles.heroEyebrow}>Plan & book</Text>
+          <Text style={styles.heroTitle}>Make the journey yours</Text>
+          <Text style={styles.heroSubtitle}>
+            Flexible search for flights & stays in one view
+          </Text>
+        </View>
+      </ImageBackground>
 
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
@@ -240,81 +212,79 @@ const BookingScreen: React.FC<BookingScreenProps> = ({navigation}) => {
         <View style={styles.inputRow}>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Check-in</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Dec 15, 2024"
-              placeholderTextColor="#666666"
-              value={searchParams.checkIn}
-              onChangeText={text =>
-                setSearchParams({...searchParams, checkIn: text})
-              }
-            />
+            <TouchableOpacity
+              style={styles.dateCard}
+              onPress={() => openPicker('checkIn')}>
+              <Text style={styles.dateCardText}>
+                {searchParams.checkIn || 'Dec 15, 2024'}
+              </Text>
+              <Text style={styles.calendarHint}>📅</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Check-out</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Dec 22, 2024"
-              placeholderTextColor="#666666"
-              value={searchParams.checkOut}
-              onChangeText={text =>
-                setSearchParams({...searchParams, checkOut: text})
-              }
-            />
+            <TouchableOpacity
+              style={styles.dateCard}
+              onPress={() => openPicker('checkOut')}>
+              <Text style={styles.dateCardText}>
+                {searchParams.checkOut || 'Dec 22, 2024'}
+              </Text>
+              <Text style={styles.calendarHint}>📅</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.inputRow}>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Travelers</Text>
-            <View style={styles.counterContainer}>
+            <View style={styles.counterCard}>
               <TouchableOpacity
-                style={styles.counterButton}
+                style={styles.counterCircle}
                 onPress={() =>
                   setSearchParams({
                     ...searchParams,
                     travelers: Math.max(1, searchParams.travelers - 1),
                   })
                 }>
-                <Text style={styles.counterButtonText}>-</Text>
+                <Text style={styles.counterCircleText}>-</Text>
               </TouchableOpacity>
-              <Text style={styles.counterText}>{searchParams.travelers}</Text>
+              <Text style={styles.counterValue}>{searchParams.travelers}</Text>
               <TouchableOpacity
-                style={styles.counterButton}
+                style={styles.counterCircle}
                 onPress={() =>
                   setSearchParams({
                     ...searchParams,
                     travelers: searchParams.travelers + 1,
                   })
                 }>
-                <Text style={styles.counterButtonText}>+</Text>
+                <Text style={styles.counterCircleText}>+</Text>
               </TouchableOpacity>
             </View>
           </View>
           {activeTab === 'hotels' && (
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Rooms</Text>
-              <View style={styles.counterContainer}>
+              <View style={styles.counterCard}>
                 <TouchableOpacity
-                  style={styles.counterButton}
+                  style={styles.counterCircle}
                   onPress={() =>
                     setSearchParams({
                       ...searchParams,
                       rooms: Math.max(1, searchParams.rooms - 1),
                     })
                   }>
-                  <Text style={styles.counterButtonText}>-</Text>
+                  <Text style={styles.counterCircleText}>-</Text>
                 </TouchableOpacity>
-                <Text style={styles.counterText}>{searchParams.rooms}</Text>
+                <Text style={styles.counterValue}>{searchParams.rooms}</Text>
                 <TouchableOpacity
-                  style={styles.counterButton}
+                  style={styles.counterCircle}
                   onPress={() =>
                     setSearchParams({
                       ...searchParams,
                       rooms: searchParams.rooms + 1,
                     })
                   }>
-                  <Text style={styles.counterButtonText}>+</Text>
+                  <Text style={styles.counterCircleText}>+</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -323,135 +293,17 @@ const BookingScreen: React.FC<BookingScreenProps> = ({navigation}) => {
       </View>
 
       {/* Search Button */}
-      <LinearGradient
-        colors={['#FFD700', '#FFA500', '#FF8C00']}
-        style={styles.searchButton}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 0}}>
-        <TouchableOpacity
-          style={styles.searchButtonInner}
-          onPress={handleSearch}>
-          <Text style={styles.searchButtonText}>🔍 Search {activeTab}</Text>
-        </TouchableOpacity>
-      </LinearGradient>
-    </View>
-  );
-
-  const renderFlightResults = () => (
-    <View style={styles.resultsContainer}>
-      <LinearGradient
-        colors={['#FFD700', '#FFA500']}
-        style={styles.resultsTitleContainer}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 0}}>
-        <Text style={styles.resultsTitle}>✈️ Available Flights</Text>
-      </LinearGradient>
-      {sampleFlights.map(flight => (
-        <TouchableOpacity
-          key={flight.id}
-          style={styles.resultCard}
-          onPress={() => handleBooking(flight)}>
-          <LinearGradient
-            colors={['#1A1A1A', '#2A2A2A']}
-            style={styles.cardGradient}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}>
-            <View style={styles.flightHeader}>
-              <Text style={styles.airline}>{flight.airline}</Text>
-              <LinearGradient
-                colors={['#FFD700', '#FFA500']}
-                style={styles.priceContainer}>
-                <Text style={styles.price}>${flight.price}</Text>
-              </LinearGradient>
-            </View>
-            <View style={styles.flightDetails}>
-              <View style={styles.timeContainer}>
-                <Text style={styles.time}>{flight.departure}</Text>
-                <View style={styles.durationContainer}>
-                  <Text style={styles.duration}>{flight.duration}</Text>
-                  <View style={styles.flightPath} />
-                </View>
-                <Text style={styles.time}>{flight.arrival}</Text>
-              </View>
-              <Text style={styles.flightNumber}>
-                Flight {flight.flightNumber}
-              </Text>
-              <Text style={styles.stops}>
-                {flight.stops === 0
-                  ? '🎯 Direct'
-                  : `🔄 ${flight.stops} stop${flight.stops > 1 ? 's' : ''}`}
-              </Text>
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-
-  const renderHotelResults = () => (
-    <View style={styles.resultsContainer}>
-      <Text style={styles.resultsTitle}>Available Hotels</Text>
-      {sampleHotels.map(hotel => (
-        <TouchableOpacity
-          key={hotel.id}
-          style={styles.resultCard}
-          onPress={() => handleBooking(hotel)}>
-          <Image source={{uri: hotel.image}} style={styles.hotelImage} />
-          <View style={styles.hotelInfo}>
-            <View style={styles.hotelHeader}>
-              <Text style={styles.hotelName}>{hotel.name}</Text>
-              <Text style={styles.price}>${hotel.price}/night</Text>
-            </View>
-            <View style={styles.ratingContainer}>
-              <Text style={styles.rating}>{'⭐'.repeat(hotel.rating)}</Text>
-              <Text style={styles.location}>{hotel.location}</Text>
-            </View>
-            <View style={styles.amenitiesContainer}>
-              {hotel.amenities.map((amenity, index) => (
-                <Text key={index} style={styles.amenity}>
-                  {amenity}
-                </Text>
-              ))}
-            </View>
-          </View>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-
-  const renderConfirmation = () => (
-    <View style={styles.confirmationContainer}>
-      <View style={styles.confirmationCard}>
-        <Text style={styles.confirmationTitle}>Booking Confirmed! 🎉</Text>
-        <Text style={styles.referenceNumber}>
-          Reference: TRV{Math.random().toString(36).substr(2, 9).toUpperCase()}
-        </Text>
-
-        {selectedBooking && (
-          <View style={styles.bookingDetails}>
-            <Text style={styles.bookingTitle}>
-              {selectedBooking.airline || selectedBooking.name}
-            </Text>
-            <Text style={styles.bookingPrice}>
-              Total: ${selectedBooking.price}
-            </Text>
-            <Text style={styles.bookingInfo}>
-              A confirmation email has been sent to your registered email
-              address.
-            </Text>
-          </View>
-        )}
-
-        <TouchableOpacity
-          style={styles.doneButton}
-          onPress={() => {
-            setShowConfirmation(false);
-            setShowResults(false);
-            setSelectedBooking(null);
-          }}>
-          <Text style={styles.doneButtonText}>Done</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.primaryButton} onPress={handleSearch}>
+        <LinearGradient
+          colors={['#FFD700', '#FFA500']}
+          style={styles.primaryButtonGradient}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 0}}>
+          <Text style={styles.primaryButtonText}>
+            {activeTab === 'flights' ? 'Search flights' : 'Find stays'}
+          </Text>
+        </LinearGradient>
+      </TouchableOpacity>
     </View>
   );
 
@@ -459,29 +311,81 @@ const BookingScreen: React.FC<BookingScreenProps> = ({navigation}) => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={navigation.goBack} style={styles.backButton}>
-          <Text style={styles.backIcon}>←</Text>
-        </TouchableOpacity>
+        <BackButton onPress={navigation.goBack} />
         <Text style={styles.headerTitle}>Bookings</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {!showResults && !showConfirmation && renderSearchForm()}
-        {showResults && !showConfirmation && (
-          <>
-            <TouchableOpacity
-              style={styles.newSearchButton}
-              onPress={() => setShowResults(false)}>
-              <Text style={styles.newSearchText}>← New Search</Text>
-            </TouchableOpacity>
-            {activeTab === 'flights'
-              ? renderFlightResults()
-              : renderHotelResults()}
-          </>
-        )}
-        {showConfirmation && renderConfirmation()}
+        {renderSearchForm()}
       </ScrollView>
+      <Modal
+        visible={showDatePicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDatePicker(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.calendarContainer}>
+            <View style={styles.calendarHeader}>
+              <TouchableOpacity
+                style={styles.navButton}
+                onPress={() => navigateMonth('prev')}>
+                <Text style={styles.navButtonText}>‹</Text>
+              </TouchableOpacity>
+              <Text style={styles.monthYearText}>
+                {selectedDate.toLocaleDateString('en-US', {
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </Text>
+              <TouchableOpacity
+                style={styles.navButton}
+                onPress={() => navigateMonth('next')}>
+                <Text style={styles.navButtonText}>›</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.daysOfWeekContainer}>
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <Text key={day} style={styles.dayOfWeekText}>
+                  {day}
+                </Text>
+              ))}
+            </View>
+            <View style={styles.calendarGrid}>
+              {calendarDays.map((date, index) => {
+                const isCurrentMonth =
+                  date.getMonth() === selectedDate.getMonth();
+                const isToday =
+                  date.toDateString() === new Date().toDateString();
+                return (
+                  <TouchableOpacity
+                    key={`${date.toISOString()}-${index}`}
+                    style={[
+                      styles.dateCell,
+                      !isCurrentMonth && styles.dateCellInactive,
+                      isToday && styles.dateCellToday,
+                    ]}
+                    onPress={() => handleDateSelect(date)}>
+                    <Text
+                      style={[
+                        styles.dateCellText,
+                        !isCurrentMonth && styles.dateCellTextInactive,
+                        isToday && styles.dateCellTextToday,
+                      ]}>
+                      {date.getDate()}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setShowDatePicker(false)}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -501,11 +405,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#333',
   },
   backButton: {
-    padding: 5,
+    padding: 4,
   },
-  backButtonText: {
-    color: '#FFD700',
-    fontSize: 18,
+  backIcon: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
   },
   headerTitle: {
     color: '#FFFFFF',
@@ -515,23 +420,37 @@ const styles = StyleSheet.create({
   headerRight: {
     width: 30,
   },
-  heroSection: {
-    padding: 25,
+  heroImage: {
+    height: 160,
     borderRadius: 20,
-    marginBottom: 20,
-    alignItems: 'center',
+    overflow: 'hidden',
   },
-  heroTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000000',
-    textAlign: 'center',
+  heroImageStyle: {
+    borderRadius: 20,
+  },
+  heroOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 20,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    borderRadius: 20,
+  },
+  heroEyebrow: {
+    color: '#FFD700',
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
     marginBottom: 8,
   },
+  heroTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
   heroSubtitle: {
-    fontSize: 16,
-    color: '#333333',
-    textAlign: 'center',
+    color: '#F1F1F1',
+    fontSize: 14,
   },
   placeholder: {
     width: 40,
@@ -542,6 +461,7 @@ const styles = StyleSheet.create({
   },
   searchForm: {
     paddingVertical: 20,
+    gap: 24,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -609,269 +529,163 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#333333',
   },
-  counterContainer: {
+  dateInputRow: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  dateCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#1A1A1A',
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#333333',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: '#333333',
   },
-  counterButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFD700',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  counterButtonText: {
-    color: '#000000',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  counterText: {
+  dateCardText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
-  searchButton: {
-    borderRadius: 15,
-    marginTop: 20,
-    elevation: 8,
-    shadowColor: '#FFD700',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
+  calendarHint: {
+    marginLeft: 10,
+    fontSize: 16,
+    color: '#FFD700',
   },
-  searchButtonInner: {
+  counterCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#141414',
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#2E2E2E',
+  },
+  counterCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFD700',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  counterCircleText: {
+    color: '#000',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  counterValue: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  primaryButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 6,
+  },
+  primaryButtonGradient: {
     paddingVertical: 18,
     alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 15,
   },
-  searchButtonText: {
-    color: '#000000',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(255,255,255,0.3)',
-    textShadowOffset: {width: 0, height: 1},
-    textShadowRadius: 2,
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-  },
-  newSearchButton: {
-    backgroundColor: '#FFD700',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 10,
-    marginTop: 20,
-  },
-  newSearchText: {
+  primaryButtonText: {
     color: '#000000',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
-  resultsContainer: {
-    paddingBottom: 20,
-  },
-  resultsTitleContainer: {
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginBottom: 20,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
-  resultsTitle: {
-    color: '#000000',
-    fontSize: 24,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(255,255,255,0.3)',
-    textShadowOffset: {width: 0, height: 1},
-    textShadowRadius: 2,
+  calendarContainer: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 18,
+    padding: 20,
   },
-  resultCard: {
-    borderRadius: 16,
+  calendarHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 16,
-    elevation: 8,
-    shadowColor: '#FFD700',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    overflow: 'hidden',
   },
-  cardGradient: {
-    padding: 16,
-    borderRadius: 16,
-  },
-  priceContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+  navButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#2E2E2E',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  durationContainer: {
-    alignItems: 'center',
-    flex: 1,
-    paddingHorizontal: 10,
-  },
-  flightPath: {
-    height: 2,
-    backgroundColor: '#FFD700',
-    width: '80%',
-    marginTop: 4,
-    borderRadius: 1,
-  },
-  flightHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  airline: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  price: {
+  navButtonText: {
     color: '#FFD700',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
-  flightDetails: {
-    gap: 8,
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  time: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  duration: {
-    color: '#999999',
-    fontSize: 14,
-  },
-  flightNumber: {
-    color: '#CCCCCC',
-    fontSize: 14,
-  },
-  stops: {
-    color: '#999999',
-    fontSize: 14,
-  },
-  hotelImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  hotelInfo: {
-    gap: 8,
-  },
-  hotelHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  hotelName: {
+  monthYearText: {
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '600',
-    flex: 1,
   },
-  ratingContainer: {
+  daysOfWeekContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    marginBottom: 10,
   },
-  rating: {
-    fontSize: 14,
+  dayOfWeekText: {
+    flex: 1,
+    textAlign: 'center',
+    color: '#A5A5A5',
+    fontSize: 12,
+    fontWeight: '600',
   },
-  location: {
-    color: '#999999',
-    fontSize: 14,
-  },
-  amenitiesContainer: {
+  calendarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    marginBottom: 20,
   },
-  amenity: {
-    backgroundColor: '#333333',
-    color: '#FFFFFF',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    fontSize: 12,
-  },
-  confirmationContainer: {
-    flex: 1,
+  dateCell: {
+    width: '14.28%',
+    aspectRatio: 1,
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 40,
+    marginVertical: 2,
   },
-  confirmationCard: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 20,
-    padding: 32,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#333333',
+  dateCellInactive: {
+    opacity: 0.3,
   },
-  confirmationTitle: {
+  dateCellToday: {
+    backgroundColor: '#FFD700',
+    borderRadius: 18,
+  },
+  dateCellText: {
     color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  referenceNumber: {
-    color: '#FFD700',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 24,
-  },
-  bookingDetails: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  bookingTitle: {
-    color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  bookingPrice: {
-    color: '#FFD700',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  bookingInfo: {
-    color: '#CCCCCC',
     fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
+    fontWeight: '600',
   },
-  doneButton: {
+  dateCellTextInactive: {
+    color: '#777777',
+  },
+  dateCellTextToday: {
+    color: '#000000',
+  },
+  cancelButton: {
     backgroundColor: '#FFD700',
     borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingVertical: 12,
+    alignItems: 'center',
   },
-  doneButtonText: {
+  cancelButtonText: {
     color: '#000000',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });
 

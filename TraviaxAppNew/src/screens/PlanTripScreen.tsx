@@ -12,6 +12,7 @@ import {
   PanResponder,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import BackButton from '../components/BackButton';
 
 const {width} = Dimensions.get('window');
 
@@ -41,7 +42,12 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
   const isDragging = useRef(false);
   const activeThumb = useRef<'min' | 'max' | null>(null);
 
-  const preferences = ['Adventure', 'Relax', 'Hotel', 'Local Cuisine'];
+  const preferences = [
+    {key: 'Adventure', icon: '🥾'},
+    {key: 'Relax', icon: '🧘'},
+    {key: 'Hotel', icon: '🏨'},
+    {key: 'Local Cuisine', icon: '🍜'},
+  ];
   const companions = ['Solo', 'Couple', 'Family'];
 
   const togglePreference = (preference: string) => {
@@ -188,14 +194,8 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      navigation.navigate('Itinerary', {
-        destination,
-        startDate,
-        endDate,
-        preferences: selectedPreferences,
-        budgetMin,
-        budgetMax,
-        companion: selectedCompanion,
+      navigation.navigate('ItineraryDetails', {
+        itineraryId: 'it1',
       });
     }, 3000);
   };
@@ -212,9 +212,7 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={navigation.goBack} style={styles.backButton}>
-          <Text style={styles.backIcon}>←</Text>
-        </TouchableOpacity>
+        <BackButton onPress={navigation.goBack} style={styles.backButton} />
         <Text style={styles.headerTitle}>Plan Your Trip</Text>
       </View>
 
@@ -281,25 +279,35 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Travel Preferences</Text>
           <View style={styles.preferencesGrid}>
-            {preferences.map(preference => (
-              <TouchableOpacity
-                key={preference}
-                style={[
-                  styles.preferenceButton,
-                  selectedPreferences.includes(preference) &&
-                    styles.preferenceButtonActive,
-                ]}
-                onPress={() => togglePreference(preference)}>
-                <Text
+            {preferences.map(({key, icon}) => {
+              const isActive = selectedPreferences.includes(key);
+              return (
+                <TouchableOpacity
+                  key={key}
                   style={[
-                    styles.preferenceText,
-                    selectedPreferences.includes(preference) &&
-                      styles.preferenceTextActive,
-                  ]}>
-                  {preference}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                    styles.preferenceCard,
+                    isActive && styles.preferenceCardActive,
+                  ]}
+                  onPress={() => togglePreference(key)}>
+                  <View style={styles.preferenceIconContainer}>
+                    <Text
+                      style={[
+                        styles.preferenceIcon,
+                        isActive && styles.preferenceIconActive,
+                      ]}>
+                      {icon}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.preferenceLabel,
+                      isActive && styles.preferenceLabelActive,
+                    ]}>
+                    {key}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
@@ -365,7 +373,8 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
                 <Text
                   style={[
                     styles.companionText,
-                    selectedCompanion === companion && styles.companionTextActive,
+                    selectedCompanion === companion &&
+                      styles.companionTextActive,
                   ]}>
                   {companion}
                 </Text>
@@ -606,27 +615,45 @@ const styles = StyleSheet.create({
   preferencesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
+    rowGap: 12,
   },
-  preferenceButton: {
+  preferenceCard: {
+    width: '48%',
     backgroundColor: '#1A1A1A',
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: '#333333',
+    borderColor: '#2A2A2A',
   },
-  preferenceButtonActive: {
-    backgroundColor: '#FFD700',
+  preferenceCardActive: {
     borderColor: '#FFD700',
+    backgroundColor: '#1F1F1F',
   },
-  preferenceText: {
-    color: '#FFFFFF',
+  preferenceIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  preferenceIcon: {
+    fontSize: 16,
+    color: '#CCCCCC',
+  },
+  preferenceIconActive: {
+    color: '#FFD700',
+  },
+  preferenceLabel: {
+    color: '#B0B0B0',
     fontSize: 14,
     fontWeight: '500',
   },
-  preferenceTextActive: {
-    color: '#000000',
+  preferenceLabelActive: {
+    color: '#FFFFFF',
   },
   budgetValue: {
     color: '#FFD700',

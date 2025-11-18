@@ -40,6 +40,47 @@ interface ItinerarySummary {
 }
 
 const DEFAULT_PLACE_RATING = 4.5;
+const DEFAULT_REEL_IMAGE =
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600&h=900&fit=crop';
+const DEFAULT_REEL_AVATAR =
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces';
+
+interface ReelCardData {
+  id: string;
+  title: string;
+  location: string;
+  thumbnail?: string;
+  description?: string;
+  tag?: string;
+  durationLabel: string;
+  source?: ApiReel;
+}
+
+interface ApiReel {
+  id?: string;
+  title?: string;
+  description?: string;
+  location?: string;
+  city?: string;
+  country?: string;
+  thumbnail?: string;
+  image?: string;
+  media?: string[];
+  tags?: string[];
+  duration?: number;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  isLiked?: boolean;
+  creator?: {
+    username?: string;
+    avatar?: string;
+  };
+  user?: {
+    username?: string;
+    avatar?: string;
+  };
+}
 
 const buildItemId = (value?: string | number) => {
   if (value === undefined || value === null || value === '') {
@@ -107,6 +148,67 @@ const mapItineraryFromApi = (item: any): ItinerarySummary => ({
   rating: coerceNumber(item?.rating, DEFAULT_PLACE_RATING),
 });
 
+const formatDurationToLabel = (durationSeconds?: number | string): string => {
+  const numericDuration = Number(durationSeconds);
+  if (!Number.isFinite(numericDuration) || numericDuration <= 0) {
+    return '0:30';
+  }
+  const minutes = Math.floor(numericDuration / 60);
+  const seconds = Math.floor(numericDuration % 60)
+    .toString()
+    .padStart(2, '0');
+  return `${minutes}:${seconds}`;
+};
+
+const mapReelFromApi = (item: any): ReelCardData => {
+  const tag =
+    Array.isArray(item?.tags) && item.tags.length > 0
+      ? String(item.tags[0]).toUpperCase()
+      : undefined;
+
+  return {
+    id: buildItemId(item?.id ?? item?.title),
+    title: item?.title ?? 'Travel Story',
+    location:
+      item?.location ??
+      item?.city ??
+      item?.country ??
+      item?.description ??
+      'Worldwide',
+    thumbnail:
+      item?.thumbnail ??
+      getPrimaryImage(item) ??
+      item?.image ??
+      DEFAULT_REEL_IMAGE,
+    description: item?.description,
+    tag,
+    durationLabel: formatDurationToLabel(item?.duration),
+    source: item,
+  };
+};
+
+const buildReelDetailsPayload = (card: ReelCardData) => {
+  const raw = card.source ?? {};
+  const creator = raw?.creator ?? raw?.user ?? {};
+  const user = raw?.user ?? {
+    username: creator?.username ?? 'traveler',
+    avatar: creator?.avatar ?? DEFAULT_REEL_AVATAR,
+  };
+
+  return {
+    id: raw?.id ?? card.id,
+    title: card.title,
+    description: raw?.description ?? card.description ?? card.location,
+    image: raw?.thumbnail ?? card.thumbnail ?? DEFAULT_REEL_IMAGE,
+    location: raw?.location ?? card.location,
+    likes: raw?.likes ?? 0,
+    comments: raw?.comments ?? 0,
+    shares: raw?.shares ?? 0,
+    isLiked: Boolean(raw?.isLiked),
+    user,
+  };
+};
+
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [trendingPlaces, setTrendingPlaces] = useState<TrendingPlace[]>([]);
@@ -118,6 +220,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [itineraries, setItineraries] = useState<ItinerarySummary[]>([]);
   const [itineraryLoading, setItineraryLoading] = useState(true);
   const [itineraryError, setItineraryError] = useState<string | null>(null);
+  const [reels, setReels] = useState<ReelCardData[]>([]);
+  const [reelLoading, setReelLoading] = useState(true);
+  const [reelError, setReelError] = useState<string | null>(null);
 
   const loadTrendingPlaces = useCallback(async () => {
     try {
@@ -149,10 +254,29 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
   }, []);
 
+  const loadReels = useCallback(async () => {
+    try {
+      setReelLoading(true);
+      setReelError(null);
+      const response = await apiService.getReels(6);
+      const mappedReels = Array.isArray(response?.reels)
+        ? response.reels.map(mapReelFromApi)
+        : [];
+      setReels(mappedReels);
+    } catch (error) {
+      console.error('Failed to load reels:', error);
+      setReelError('Unable to load reels');
+      setReels([]);
+    } finally {
+      setReelLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadTrendingPlaces();
     loadItineraries();
-  }, [loadTrendingPlaces, loadItineraries]);
+    loadReels();
+  }, [loadTrendingPlaces, loadItineraries, loadReels]);
 
   const buildTrendingPlaceDetails = useCallback((place: TrendingPlace) => {
     const ratingValue = coerceNumber(place.rating, DEFAULT_PLACE_RATING);
@@ -236,6 +360,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     debouncedSearch.cancel();
     performSearch(trimmed);
   }, [searchQuery, debouncedSearch, performSearch]);
+
+  const handleOpenReel = useCallback(
+    (card: ReelCardData) => {
+      const payload = buildReelDetailsPayload(card);
+      navigation?.navigate?.('ReelDetails', {
+        reel: {
+          ...payload,
+          image: payload.image,
+        },
+      });
+    },
+    [navigation],
+  );
 
   const isSearching = searchQuery.trim().length > 0;
   const displayTrending = isSearching ? searchResults : trendingPlaces;
@@ -360,18 +497,60 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             <Text style={styles.tab}>Recommended</Text>
           </View>
         </View>
-        <View style={styles.reelsRow}>
-          <View style={styles.reelCard}>
-            <View style={styles.reelImage}>
-              <Text style={styles.reelEmoji}>🏛️</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.reelsScroll}>
+          {reelLoading ? (
+            <View style={styles.reelPlaceholderCard}>
+              <ActivityIndicator color="#FFD700" />
+              <Text style={styles.reelPlaceholderText}>Loading reels...</Text>
             </View>
-          </View>
-          <View style={styles.reelCard}>
-            <View style={styles.reelImage}>
-              <Text style={styles.reelEmoji}>🏔️</Text>
+          ) : reelError ? (
+            <TouchableOpacity
+              style={styles.reelPlaceholderCard}
+              onPress={loadReels}>
+              <Text style={styles.reelPlaceholderText}>{reelError}</Text>
+              <Text style={styles.reelErrorText}>Tap to retry</Text>
+            </TouchableOpacity>
+          ) : reels.length === 0 ? (
+            <View style={styles.reelPlaceholderCard}>
+              <Text style={styles.reelPlaceholderText}>
+                No reels available right now
+              </Text>
             </View>
-          </View>
-        </View>
+          ) : (
+            reels.map((reel: ReelCardData) => (
+              <TouchableOpacity
+                key={reel.id}
+                style={styles.reelCardLarge}
+                activeOpacity={0.85}
+                onPress={() => handleOpenReel(reel)}>
+                <ImageBackground
+                  source={{uri: reel.thumbnail ?? DEFAULT_REEL_IMAGE}}
+                  style={styles.reelImageLarge}
+                  imageStyle={styles.reelImageLargeRadius}>
+                  <LinearGradient
+                    colors={['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.85)']}
+                    style={styles.reelOverlay}>
+                    <View style={styles.reelTopRow}>
+                      <Text style={styles.reelTag}>
+                        {(reel.tag ?? 'TRENDING').toUpperCase()}
+                      </Text>
+                      <Text style={styles.reelDuration}>
+                        {reel.durationLabel}
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={styles.reelTitle}>{reel.title}</Text>
+                      <Text style={styles.reelMeta}>{reel.location}</Text>
+                    </View>
+                  </LinearGradient>
+                </ImageBackground>
+              </TouchableOpacity>
+            ))
+          )}
+        </ScrollView>
       </View>
 
       {/* Trending Places */}
@@ -674,24 +853,74 @@ const styles = StyleSheet.create({
     color: '#FFD700',
     fontWeight: '600',
   },
-  reelsRow: {
-    flexDirection: 'row',
-    gap: 12,
+  reelsScroll: {
+    gap: 16,
+    paddingHorizontal: 4,
   },
-  reelCard: {
-    flex: 1,
-    height: 160,
-    borderRadius: 12,
+  reelCardLarge: {
+    width: 180,
+    height: 260,
+    borderRadius: 18,
+    marginRight: 16,
     overflow: 'hidden',
   },
-  reelImage: {
-    flex: 1,
-    backgroundColor: '#2A2A2A',
+  reelPlaceholderCard: {
+    width: 180,
+    height: 260,
+    borderRadius: 18,
+    marginRight: 16,
+    backgroundColor: '#1A1A1A',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 16,
   },
-  reelEmoji: {
-    fontSize: 32,
+  reelPlaceholderText: {
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  reelErrorText: {
+    color: '#FFD700',
+    marginTop: 6,
+  },
+  reelImageLarge: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  reelImageLargeRadius: {
+    borderRadius: 18,
+  },
+  reelOverlay: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'space-between',
+  },
+  reelTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  reelTag: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  reelDuration: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  reelTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  reelMeta: {
+    color: '#B5B5B5',
+    fontSize: 13,
   },
   placesRow: {
     flexDirection: 'row',

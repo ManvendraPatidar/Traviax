@@ -10,6 +10,7 @@ import {
   Dimensions,
   Share,
 } from 'react-native';
+import BackButton from '../components/BackButton';
 import LinearGradient from 'react-native-linear-gradient';
 
 const {width, height} = Dimensions.get('window');
@@ -214,11 +215,7 @@ const PlaceDetailsScreen: React.FC<PlaceDetailsScreenProps> = ({
             colors={['transparent', 'rgba(0,0,0,0.8)']}
             style={styles.heroGradient}>
             {/* Back Button */}
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}>
-              <Text style={styles.backButtonText}>←</Text>
-            </TouchableOpacity>
+            <BackButton onPress={navigation.goBack} style={styles.backButton} />
 
             {/* Place Info */}
             <View style={styles.placeInfo}>
@@ -328,19 +325,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: 'rgba(0,0,0,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'flex-start',
-    marginTop: 10,
-  },
-  backButtonText: {
-    color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: 'bold',
   },
   placeInfo: {
     alignSelf: 'stretch',

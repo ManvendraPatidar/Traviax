@@ -9,29 +9,48 @@ import PlanTripScreen from '../screens/PlanTripScreen';
 import ItineraryScreen from '../screens/ItineraryScreen';
 import ChatScreen from '../screens/ChatScreen';
 import GiftScreen from '../screens/GiftScreen';
+import ItenaryListScreen from '../screens/ItenaryListScreen';
 import ItineraryDetailsScreen from '../screens/ItineraryDetailsScreen';
 import BookingScreen from '../screens/BookingScreen';
+import SearchResultsScreen from '../screens/SearchResultsScreen';
 import PlaceDetailsScreen from '../screens/PlaceDetailsScreen';
 import SimpleTabBar from '../components/SimpleTabBar';
 
+type StackEntry = {
+  name: string;
+  params?: any;
+};
+
 const SimpleNavigator = () => {
   const [activeTab, setActiveTab] = useState('Home');
-  const [currentScreen, setCurrentScreen] = useState('tab');
-  const [screenParams, setScreenParams] = useState<any>(null);
+  const [stack, setStack] = useState<StackEntry[]>([{name: 'tab'}]);
+
+  const currentEntry = stack[stack.length - 1];
+  const currentScreen = currentEntry.name;
+  const screenParams = currentEntry.params;
 
   const navigate = (screenName: string, params?: any) => {
-    setCurrentScreen(screenName);
-    setScreenParams(params);
+    setStack(prev => [...prev, {name: screenName, params}]);
   };
 
   const goBack = () => {
-    setCurrentScreen('tab');
-    setScreenParams(null);
+    setStack(prev => {
+      if (prev.length <= 1) {
+        return prev;
+      }
+      return prev.slice(0, prev.length - 1);
+    });
+  };
+
+  const navigateToHome = () => {
+    setActiveTab('Home');
+    setStack([{name: 'tab'}]);
   };
 
   const navigation = {
     navigate,
     goBack,
+    navigateToHome,
   };
 
   const renderTabScreen = () => {
@@ -50,6 +69,9 @@ const SimpleNavigator = () => {
   };
 
   const renderScreen = () => {
+    if (currentScreen === 'tab') {
+      return renderTabScreen();
+    }
     if (currentScreen === 'ReelDetails') {
       return (
         <ReelDetailsScreen
@@ -65,7 +87,17 @@ const SimpleNavigator = () => {
       return <ChatScreen navigation={navigation} />;
     }
     if (currentScreen === 'Gift') {
-      return <GiftScreen navigation={navigation} />;
+      return (
+        <GiftScreen route={{params: screenParams}} navigation={navigation} />
+      );
+    }
+    if (currentScreen === 'ItenaryList') {
+      return (
+        <ItenaryListScreen
+          route={{params: screenParams}}
+          navigation={navigation}
+        />
+      );
     }
     if (currentScreen === 'ItineraryDetails') {
       return (
@@ -77,6 +109,14 @@ const SimpleNavigator = () => {
     }
     if (currentScreen === 'Booking') {
       return <BookingScreen navigation={navigation} />;
+    }
+    if (currentScreen === 'SearchResults') {
+      return (
+        <SearchResultsScreen
+          navigation={navigation}
+          route={{params: screenParams}}
+        />
+      );
     }
     if (currentScreen === 'PlaceDetails') {
       return (
@@ -97,13 +137,18 @@ const SimpleNavigator = () => {
     return renderTabScreen();
   };
 
+  const handleTabPress = (tabName: string) => {
+    setActiveTab(tabName);
+    setStack([{name: 'tab'}]);
+  };
+
   const showTabBar = currentScreen === 'tab';
 
   return (
     <View style={styles.container}>
       <View style={styles.screenContainer}>{renderScreen()}</View>
       {showTabBar && (
-        <SimpleTabBar activeTab={activeTab} onTabPress={setActiveTab} />
+        <SimpleTabBar activeTab={activeTab} onTabPress={handleTabPress} />
       )}
     </View>
   );
