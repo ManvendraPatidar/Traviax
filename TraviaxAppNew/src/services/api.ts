@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://192.168.100.206:8002/api/v1';
+const API_BASE_URL = 'http://103.204.52.50:8006/api/v1';
 export interface UserProfile {
   id: string;
   username: string;

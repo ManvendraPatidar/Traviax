@@ -228,8 +228,7 @@ npm install
 
 The app connects to backend services for data. Update the API endpoints in `src/services/api.ts` as needed:
 
-- Main API: `http://103.204.52.50:8006/api/v1`
-- Itinerary Service: `http://192.168.100.206:8002/api`
+- BASE URL : `http://103.204.52.50:8006/api/v1`
 
 ## Contributing
 

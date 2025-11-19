@@ -523,14 +523,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                       </View>
                     </View>
                   </View>
-                  {index === 2 && (
-                    <View style={styles.loadingIndicatorContainer}>
-                      <ActivityIndicator size="small" color="#FFD700" />
-                      <Text style={styles.loadingText}>
-                        Loading amazing reels...
-                      </Text>
-                    </View>
-                  )}
                 </View>
               ))}
             </>
