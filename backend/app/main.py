@@ -33,7 +33,7 @@ app.add_middleware(
 )
 
 # Static files
-app.mount("/assets", StaticFiles(directory="assets"), name="assets")
+# app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
 # API routes
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])

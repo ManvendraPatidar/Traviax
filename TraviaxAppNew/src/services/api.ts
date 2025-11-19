@@ -1,5 +1,4 @@
 const API_BASE_URL = 'http://192.168.100.206:8002/api/v1';
-
 export interface UserProfile {
   id: string;
   username: string;
@@ -184,26 +183,18 @@ class ApiService {
     selectedPreferences?: string[];
     flexibleDates?: boolean;
   }): Promise<any> {
+    console.log('🚀 Generating itinerary with data:', tripData);
+    console.log('🌐 API URL:', `${API_BASE_URL}/generateItinerary`);
+
     try {
-      const response = await fetch(
-        'http://192.168.100.206:8002/api/generateItinerary',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(tripData),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const itinerary = await response.json();
-      return itinerary;
+      const result = await this.makeRequest<any>('/generateItinerary', {
+        method: 'POST',
+        body: JSON.stringify(tripData),
+      });
+      console.log('✅ Itinerary generated successfully:', result);
+      return result;
     } catch (error) {
-      console.error('Failed to generate itinerary:', error);
+      console.error('❌ Failed to generate itinerary:', error);
       throw error;
     }
   }

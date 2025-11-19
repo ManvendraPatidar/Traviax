@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,7 @@ interface Message {
 }
 
 const ChatScreen: React.FC<ChatScreenProps> = ({navigation}) => {
+  const scrollViewRef = useRef<ScrollView>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -39,6 +40,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({navigation}) => {
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({animated: true});
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [messages, isLoading]);
 
   const sendMessage = async () => {
     const content = inputText.trim();
@@ -58,6 +67,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({navigation}) => {
     setInputText('');
     setIsLoading(true);
 
+    // Scroll to bottom immediately after sending message
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({animated: true});
+    }, 50);
+
     try {
       // Build conversation history (exclude the just-sent message; it's passed separately)
       const history: Array<{
@@ -76,6 +90,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({navigation}) => {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, aiMessage]);
+
+      // Scroll to bottom after AI response
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({animated: true});
+      }, 100);
     } catch (error: any) {
       const aiError: Message = {
         id: (Date.now() + 2).toString(),
@@ -84,6 +103,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({navigation}) => {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, aiError]);
+
+      // Scroll to bottom after error message
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({animated: true});
+      }, 100);
     } finally {
       setIsLoading(false);
     }
@@ -158,8 +182,10 @@ const ChatScreen: React.FC<ChatScreenProps> = ({navigation}) => {
 
       {/* Messages */}
       <ScrollView
+        ref={scrollViewRef}
         style={styles.messagesContainer}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.messagesContent}>
         {messages.map(renderMessage)}
         {isLoading && (
           <View style={[styles.messageContainer, styles.aiMessage]}>
@@ -258,6 +284,9 @@ const styles = StyleSheet.create({
   messagesContainer: {
     flex: 1,
     paddingHorizontal: 16,
+  },
+  messagesContent: {
+    paddingBottom: 20,
   },
   messageContainer: {
     flexDirection: 'row',

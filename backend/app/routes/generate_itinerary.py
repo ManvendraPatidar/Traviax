@@ -40,7 +40,7 @@ def load_example_itinerary():
         print(f"Error loading example itinerary: {e}")
     return None
 
-@router.post("/api/generateItinerary")
+@router.post("/api/v1/generateItinerary")
 async def generate_itinerary(request: GenerateItineraryRequest):
     """Generate a travel itinerary using OpenAI"""
     
@@ -48,12 +48,19 @@ async def generate_itinerary(request: GenerateItineraryRequest):
     example_itinerary = load_example_itinerary()
     
     if not example_itinerary:
-        raise HTTPException(status_code=500, detail="Failed to load itinerary template")
+        return {
+            "success": False,
+            "error": {"message": "Failed to load itinerary template"}
+        }
     
     # If OpenAI is not configured, return a mock itinerary
     if not client:
         print("OpenAI not configured, returning mock itinerary")
-        return create_mock_itinerary(request, example_itinerary)
+        mock_itinerary = create_mock_itinerary(request, example_itinerary)
+        return {
+            "success": True,
+            "data": mock_itinerary
+        }
     
     try:
         # Create the system prompt with exact JSON structure
@@ -121,16 +128,27 @@ Return ONLY the JSON object, nothing else."""
             if field not in itinerary_data:
                 raise ValueError(f"Missing required field: {field}")
         
-        return itinerary_data
+        return {
+            "success": True,
+            "data": itinerary_data
+        }
         
     except json.JSONDecodeError as e:
         print(f"JSON parsing error: {e}")
         # Fallback to mock itinerary
-        return create_mock_itinerary(request, example_itinerary)
+        mock_itinerary = create_mock_itinerary(request, example_itinerary)
+        return {
+            "success": True,
+            "data": mock_itinerary
+        }
     except Exception as e:
         print(f"Error generating itinerary with OpenAI: {e}")
         # Fallback to mock itinerary
-        return create_mock_itinerary(request, example_itinerary)
+        mock_itinerary = create_mock_itinerary(request, example_itinerary)
+        return {
+            "success": True,
+            "data": mock_itinerary
+        }
 
 def create_mock_itinerary(request: GenerateItineraryRequest, example: Dict[str, Any]) -> Dict[str, Any]:
     """Create a mock itinerary when OpenAI is not available"""

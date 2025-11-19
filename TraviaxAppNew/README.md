@@ -1,79 +1,252 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Traviax - Travel Planning Mobile App
 
-# Getting Started
+A comprehensive React Native mobile application for travel planning, exploration, and social sharing. Discover places, plan itineraries, book accommodations, and share your travel experiences with the community.
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+## Project Overview
 
-## Step 1: Start the Metro Server
+Traviax is a feature-rich travel application that combines trip planning with social networking. Users can explore destinations, create custom itineraries, book hotels and activities, interact with travel content through reels, and connect with fellow travelers.
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+## Features
 
-To start Metro, run the following command from the _root_ of your React Native project:
+- **🗺️ Trip Planning**: AI-powered itinerary generation with customizable preferences
+- **🏨 Hotel Booking**: Browse and book accommodations with detailed information
+- **🎯 Activity Discovery**: Find and book local activities and experiences
+- **📱 Social Feed**: Share travel experiences through posts and reels
+- **💬 AI Chat Assistant**: Get travel recommendations and planning help
+- **🔍 Smart Search**: Explore destinations, hotels, and activities
+- **👤 User Profiles**: Track visits, check-ins, and travel statistics
+- **🎁 Gift Features**: Send travel-related gifts to other users
+- **📍 Place Details**: Comprehensive information about destinations
+
+## Tech Stack
+
+- **Framework**: React Native 0.72.10
+- **Language**: TypeScript 4.8.4
+- **Runtime**: React 18.2.0
+- **Navigation**: Custom navigation system
+- **State Management**: React hooks and context
+- **HTTP Client**: Fetch API
+- **UI Components**: Custom components with React Native core
+- **Icons & Graphics**: React Native SVG
+- **Storage**: AsyncStorage for local data persistence
+- **Styling**: React Native StyleSheet with Linear Gradient support
+- **Date Handling**: React Native DateTimePicker
+- **Markdown**: React Native Markdown Display
+- **Utilities**: Lodash debounce for performance optimization
+
+## Prerequisites
+
+Before running this application, ensure you have the following installed:
+
+- **Node.js**: Version 16 or higher
+- **npm** or **Yarn**: Package manager
+- **React Native CLI**: `npm install -g @react-native-community/cli`
+- **Java Development Kit (JDK)**: Version 11 or higher
+- **Android Studio**: With Android SDK and emulator setup
+- **Xcode**: Version 12 or higher (macOS only, for iOS development)
+- **Watchman**: For file watching (recommended)
+- **CocoaPods**: For iOS dependencies (macOS only)
+
+### Platform-Specific Requirements
+
+#### Android
+
+- Android SDK (API level 21 or higher)
+- Android Virtual Device (AVD) or physical device
+- USB debugging enabled (for physical device)
+
+#### iOS (macOS only)
+
+- Xcode Command Line Tools
+- iOS Simulator or physical iOS device
+- Apple Developer account (for device testing)
+
+## Installation Steps
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd TraviaxAppNew
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   # OR
+   yarn install
+   ```
+
+3. **Install iOS dependencies** (macOS only)
+   ```bash
+   cd ios && pod install && cd ..
+   ```
+
+## Environment Setup
+
+### Android Setup
+
+1. **Configure Android SDK**
+
+   - Open Android Studio
+   - Go to SDK Manager and install required SDK versions
+   - Set ANDROID_HOME environment variable
+
+2. **Create Virtual Device**
+
+   - Open AVD Manager in Android Studio
+   - Create a new virtual device with API level 21+
+
+3. **Enable Developer Options** (Physical Device)
+   - Go to Settings > About Phone
+   - Tap "Build Number" 7 times
+   - Enable "USB Debugging" in Developer Options
+
+### iOS Setup (macOS only)
+
+1. **Install Xcode**
+
+   - Download from Mac App Store
+   - Install Xcode Command Line Tools: `xcode-select --install`
+
+2. **Configure Simulator**
+   - Open Xcode
+   - Go to Window > Devices and Simulators
+   - Add iOS simulators as needed
+
+## Running the App
+
+### Start Metro Bundler
 
 ```bash
-# using npm
 npm start
-
-# OR using Yarn
+# OR
 yarn start
 ```
-
-## Step 2: Start your Application
-
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
 
 ### For Android
 
 ```bash
-# using npm
+npx react-native run-android
+# OR
 npm run android
-
-# OR using Yarn
+# OR
 yarn android
 ```
 
-### For iOS
+### For iOS (macOS only)
 
 ```bash
-# using npm
+npx pod-install && npx react-native run-ios
+# OR
 npm run ios
-
-# OR using Yarn
+# OR
 yarn ios
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+## Build/Release Guide
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+### Android APK/AAB Build
 
-## Step 3: Modifying your App
+1. **Generate Release APK**
 
-Now that you have successfully run the app, let's modify it.
+   ```bash
+   cd android
+   ./gradlew assembleRelease
+   ```
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+   APK location: `android/app/build/outputs/apk/release/app-release.apk`
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+2. **Generate Release AAB** (for Play Store)
+   ```bash
+   cd android
+   ./gradlew bundleRelease
+   ```
+   AAB location: `android/app/build/outputs/bundle/release/app-release.aab`
 
-## Congratulations! :tada:
+### iOS Archive (macOS only)
 
-You've successfully run and modified your React Native App. :partying_face:
+1. **Open in Xcode**
 
-### Now what?
+   ```bash
+   open ios/TraviaxAppNew.xcworkspace
+   ```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+2. **Archive for Distribution**
+   - Select "Any iOS Device" as target
+   - Go to Product > Archive
+   - Follow the distribution wizard
 
-# Troubleshooting
+#### Gradle Build Issues (Android)
 
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+```bash
+# Clean and rebuild
+cd android
+./gradlew clean
+cd ..
+npx react-native run-android
+```
 
-# Learn More
+#### Pod Installation Issues (iOS)
 
-To learn more about React Native, take a look at the following resources:
+```bash
+# Clean and reinstall pods
+cd ios
+rm -rf Pods Podfile.lock
+pod install
+cd ..
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Useful Scripts
+
+```bash
+# Start development server
+npm start
+
+# Run on Android
+npm run android
+
+# Run on iOS
+npm run ios
+
+# Run tests
+npm test
+
+# Lint code
+npm run lint
+
+# Type checking
+npx tsc --noEmit
+
+# Clean everything and reinstall
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## API Configuration
+
+The app connects to backend services for data. Update the API endpoints in `src/services/api.ts` as needed:
+
+- Main API: `http://103.204.52.50:8006/api/v1`
+- Itinerary Service: `http://192.168.100.206:8002/api`
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly on both platforms
+5. Submit a pull request
+
+## Support
+
+For issues and questions:
+
+- Check the troubleshooting section above
+- Review React Native documentation
+- Check platform-specific setup guides
+
+---
+
+Built with ❤️ using React Native
