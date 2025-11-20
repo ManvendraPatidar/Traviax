@@ -3,7 +3,7 @@
  */
 
 // Expiry date: November 21, 2024 at 1:00 PM (13:00)
-const EXPIRY_DATE = new Date('2025-11-21T18:15:00');
+const EXPIRY_DATE = new Date('2026-01-20T00:00:00');
 
 /**
  * Check if the app has expired
