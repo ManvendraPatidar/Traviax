@@ -116,20 +116,24 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
 
     if (isNaN(numValue) || value === '') {
       setBudgetMin(0);
+      if (value === '') {
+        setBudgetMinError('Minimum budget is required');
+      }
       return;
     }
 
-    if (numValue < 100) {
-      setBudgetMinError('Minimum budget should be at least $100');
-      return;
-    }
-
-    if (numValue >= budgetMax) {
+    if (budgetMax > 0 && numValue >= budgetMax) {
       setBudgetMinError('Minimum budget should be less than maximum budget');
+      setBudgetMin(numValue);
       return;
     }
 
     setBudgetMin(numValue);
+
+    // Re-validate max budget if it exists
+    if (budgetMax > 0 && budgetMax <= numValue) {
+      setBudgetMaxError('Maximum budget should be greater than minimum budget');
+    }
   };
 
   const handleBudgetMaxChange = (value: string) => {
@@ -140,20 +144,30 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
 
     if (isNaN(numValue) || value === '') {
       setBudgetMax(0);
+      if (value === '') {
+        setBudgetMaxError('Maximum budget is required');
+      }
       return;
     }
 
     if (numValue > 50000) {
       setBudgetMaxError('Maximum budget should not exceed $50,000');
+      setBudgetMax(numValue);
       return;
     }
 
-    if (numValue <= budgetMin) {
+    if (budgetMin > 0 && numValue <= budgetMin) {
       setBudgetMaxError('Maximum budget should be greater than minimum budget');
+      setBudgetMax(numValue);
       return;
     }
 
     setBudgetMax(numValue);
+
+    // Re-validate min budget if it exists
+    if (budgetMin > 0 && budgetMin >= numValue) {
+      setBudgetMinError('Minimum budget should be less than maximum budget');
+    }
   };
 
   const formatCurrency = (value: number) => {
@@ -164,21 +178,47 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
     // Reset errors
     setDestinationError('');
     setDatesError('');
+    setBudgetMinError('');
+    setBudgetMaxError('');
+
+    let hasErrors = false;
 
     // Validate destination
     const trimmedDestination = destination.trim();
     if (!trimmedDestination) {
       setDestinationError('Please enter a destination.');
+      hasErrors = true;
     }
 
     // Validate dates
     const hasValidDates = startDate !== 'Start date' && endDate !== 'End date';
     if (!hasValidDates) {
       setDatesError('Please select the trip dates.');
+      hasErrors = true;
+    }
+
+    // Validate budget
+    if (budgetMin <= 0) {
+      setBudgetMinError('Minimum budget is required');
+      hasErrors = true;
+    }
+
+    if (budgetMax <= 0) {
+      setBudgetMaxError('Maximum budget is required');
+      hasErrors = true;
+    } else if (budgetMax > 50000) {
+      setBudgetMaxError('Maximum budget should not exceed $50,000');
+      hasErrors = true;
+    }
+
+    if (budgetMin > 0 && budgetMax > 0 && budgetMin >= budgetMax) {
+      setBudgetMinError('Minimum budget should be less than maximum budget');
+      setBudgetMaxError('Maximum budget should be greater than minimum budget');
+      hasErrors = true;
     }
 
     // If validation fails, don't proceed
-    if (!trimmedDestination || !hasValidDates) {
+    if (hasErrors) {
       return;
     }
 
@@ -393,13 +433,14 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
           <View style={styles.budgetInputContainer}>
             <View style={styles.budgetInputWrapper}>
               <Text style={styles.budgetInputLabel}>Minimum Budget</Text>
-              <View style={styles.budgetInputField}>
+              <View
+                style={[
+                  styles.budgetInputField,
+                  budgetMinError ? styles.budgetInputError : null,
+                ]}>
                 <Text style={styles.currencySymbol}>$</Text>
                 <TextInput
-                  style={[
-                    styles.budgetInput,
-                    budgetMinError ? styles.budgetInputError : null,
-                  ]}
+                  style={styles.budgetInput}
                   value={budgetMin > 0 ? budgetMin.toString() : ''}
                   onChangeText={handleBudgetMinChange}
                   placeholder="500"
@@ -415,13 +456,14 @@ const PlanTripScreen: React.FC<PlanTripScreenProps> = ({navigation}) => {
 
             <View style={styles.budgetInputWrapper}>
               <Text style={styles.budgetInputLabel}>Maximum Budget</Text>
-              <View style={styles.budgetInputField}>
+              <View
+                style={[
+                  styles.budgetInputField,
+                  budgetMaxError ? styles.budgetInputError : null,
+                ]}>
                 <Text style={styles.currencySymbol}>$</Text>
                 <TextInput
-                  style={[
-                    styles.budgetInput,
-                    budgetMaxError ? styles.budgetInputError : null,
-                  ]}
+                  style={styles.budgetInput}
                   value={budgetMax > 0 ? budgetMax.toString() : ''}
                   onChangeText={handleBudgetMaxChange}
                   placeholder="2000"
@@ -975,7 +1017,6 @@ const styles = StyleSheet.create({
   },
   budgetInputError: {
     borderColor: '#FF4444',
-    borderWidth: 2,
   },
   budgetErrorText: {
     color: '#FF4444',
