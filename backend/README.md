@@ -113,3 +113,25 @@ Once the server is running, access the interactive API documentation:
 - **OpenAI**: AI-powered features and chat
 
 **Traviax Backend API** - Premium social travel platform with cinematic black & gold theme ✨
+
+---
+
+## 📄 License & Evaluation Terms
+
+**The source code provided as part of this POC is solely for evaluation. Hiteshi Infotech retains complete ownership, IP rights, and full authority over this code. Although the code may include open-source components, all custom code written by Hiteshi is free only for evaluation. As per our agreement with Travaix, IP ownership may be transferred only after the final project is awarded and contract is signed between the two companies.**
+
+### 🚫 Usage Restrictions
+
+**Commercial use, deployment, resale, or integration into production systems is strictly prohibited without explicit written approval and commercial licensing from Hiteshi Infotech.**
+
+### 📋 Key Terms
+
+- **The source code is being shared only for evaluation, not for commercial use**
+- **No commercial rights or licenses are granted**
+- **Ownership & IP remain with Hiteshi Infotech until an official contract is awarded**
+- **If the client wants to use the code commercially, a separate paid license is required**
+
+### ⏰ Time-Restricted Access (60 Days) + Destruction Obligation
+
+- **The APK & Code must stop working (or show expiry message) after 60 days**
+- **The client must destroy all materials after the evaluation period if the project is not awarded**

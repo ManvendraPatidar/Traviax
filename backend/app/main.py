@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 
 from app.core.config import settings
+from app.core.logging import APILoggingMiddleware, log_info
 from app.routers import reels, users, places, checkins, bookings, concierge, events, auth, explore, chat
 from app.routes import itineraries, generate_itinerary
 
@@ -12,9 +13,11 @@ from app.routes import itineraries, generate_itinerary
 async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Traviax API starting up...")
+    log_info("Traviax API starting up...")
     yield
     # Shutdown
     print("👋 Traviax API shutting down...")
+    log_info("Traviax API shutting down...")
 
 app = FastAPI(
     title="Traviax API",
@@ -22,6 +25,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# Add API logging middleware (should be added first to capture all requests)
+app.add_middleware(APILoggingMiddleware)
 
 # CORS middleware
 app.add_middleware(

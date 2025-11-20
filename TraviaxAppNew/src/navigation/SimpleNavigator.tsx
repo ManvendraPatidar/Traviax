@@ -16,7 +16,9 @@ import SearchResultsScreen from '../screens/SearchResultsScreen';
 import PlaceDetailsScreen from '../screens/PlaceDetailsScreen';
 import ActivityDetailsScreen from '../screens/ActivityDetailsScreen';
 import GeneratedItineraryDetailsScreen from '../screens/GeneratedItineraryDetailsScreen';
+import ExpiryScreen from '../screens/ExpiryScreen';
 import SimpleTabBar from '../components/SimpleTabBar';
+import {isAppExpired} from '../services/expiryService';
 
 type StackEntry = {
   name: string;
@@ -26,6 +28,7 @@ type StackEntry = {
 const SimpleNavigator = () => {
   const [activeTab, setActiveTab] = useState('Home');
   const [stack, setStack] = useState<StackEntry[]>([{name: 'tab'}]);
+  const [appExpired, setAppExpired] = useState(false);
 
   const currentEntry = stack[stack.length - 1];
   const currentScreen = currentEntry.name;
@@ -55,11 +58,31 @@ const SimpleNavigator = () => {
     navigateToHome,
   };
 
+  // Check for app expiry on component mount and periodically
+  useEffect(() => {
+    const checkExpiry = () => {
+      setAppExpired(isAppExpired());
+    };
+
+    // Check immediately
+    checkExpiry();
+
+    // Check every minute to ensure real-time expiry detection
+    const interval = setInterval(checkExpiry, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Handle Android hardware back button
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       () => {
+        // If app is expired, don't allow back navigation
+        if (appExpired) {
+          return true; // Block back press
+        }
+
         // If we're on a tab screen (stack length is 1), don't handle the back press
         // This allows the app to close when on the main tab screen
         if (stack.length <= 1) {
@@ -74,7 +97,7 @@ const SimpleNavigator = () => {
 
     // Cleanup the listener when component unmounts
     return () => backHandler.remove();
-  }, [stack.length]); // Re-run when stack length changes
+  }, [stack.length, appExpired]); // Re-run when stack length or expiry status changes
 
   const renderTabScreen = () => {
     switch (activeTab) {
@@ -181,7 +204,16 @@ const SimpleNavigator = () => {
     setStack([{name: 'tab'}]);
   };
 
-  const showTabBar = currentScreen === 'tab';
+  const showTabBar = currentScreen === 'tab' && !appExpired;
+
+  // If app is expired, show only the expiry screen
+  if (appExpired) {
+    return (
+      <View style={styles.container}>
+        <ExpiryScreen />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
